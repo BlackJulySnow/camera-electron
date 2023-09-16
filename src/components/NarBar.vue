@@ -17,6 +17,14 @@
                             aria-current="page" :to="{ name: 'admin_goods_management' }">
                             订单管理</router-link>
                     </li>
+
+                    <li class="nav-item md-2">
+                        <router-link
+                            :class="route_name == 'admin_goods_management' ? 'nav-link active mleft' : 'mleft nav-link'"
+                            aria-current="page" :to="{ name: 'admin_goods_management' }">
+                            回放订单</router-link>
+                    </li>
+
                     <li class="nav-item md-2">
                         <router-link
                             :class="route_name == 'admin_video_management' ? 'nav-link active mleft' : 'mleft nav-link'"
@@ -47,6 +55,7 @@
                             aria-current="page" :to="{ name: 'admin_license_management' }">
                             系统设置</router-link>
                     </li>
+
                 </ul>
                 <ul class="navbar-nav" v-if="$store.state.user.is_login">
                     <li class="nav-item dropdown">

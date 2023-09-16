@@ -3,10 +3,12 @@ import store from '@/store'
 
 export var base;
 if(process.env.NODE_ENV === 'development'){//如果是开发环境
-    base = window.location.protocol + '//' + window.location.hostname;
+    base = window.location.protocol + '//' + "127.0.0.1";
 }else{
-    base = window.location.protocol + '//' + window.location.hostname + ":" + window.location.port
+    // base = window.location.protocol + '//' + window.location.hostname + ":" + window.location.port
+    base = window.location.protocol + '//' + "127.0.0.1" + ":" + "80"
 }
+let flask = 'http://127.0.0.1:5000'
 export const postRequest = (url, params, success, error) => {
     return $.ajax({
         url: base + url,
@@ -45,6 +47,16 @@ export const loginRequest = (url, params, success, error) => {
 export const pureRequest = (url, params, success, error) => {
     return $.ajax({
         url: base + url,
+        data: params,
+        type: "post",
+        success,
+        error,
+    });
+}
+
+export const flaskRequest = (url, params, success, error) => {
+    return $.ajax({
+        url: flask + url,
         data: params,
         type: "post",
         success,
