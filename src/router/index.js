@@ -9,6 +9,7 @@ import StationManagementView from '@/views/admin/StationManagementView.vue'
 import GoodsManagementView from '@/views/admin/GoodsManagementView.vue'
 import VideoManagementView from '@/views/admin/VideoManagementView.vue'
 import GroupManagementView from '@/views/admin/GroupManagementView.vue'
+import TestView from '@/views/home/HomeView.vue'
 
 import store from '@/store'
 
@@ -110,6 +111,11 @@ const routes = [{
             requestAuth: true,
             title: "组别管理",
         }
+    },
+    {
+        path: '/test',
+        name: 'test',
+        component: TestView,
     }
 ]
 

@@ -11,8 +11,8 @@
                         <h1>暂不支持video标签</h1>
                     </videoPlay>
                 </div>
-                <el-slider range :max="100" @input="changeProcess" />
-                <el-button type="success" @click="submit">确认导出</el-button>
+                <!-- <el-slider range :max="100" @input="changeProcess" />
+                <el-button type="success" @click="submit">确认导出</el-button> -->
             </div>
         </div>
     </div>

@@ -3,8 +3,8 @@
         <div class="col-2"></div>
         <div class="col-8">
             <el-card>
-                <p>当前系统时间：{{ time }} &nbsp&nbsp&nbsp&nbsp 过期时间：{{ expireTime }}</p>
-                <p></p>
+                <p>当前系统时间：{{ time }}</p>
+                <p>过期时间：{{ expireTime }}</p>
             </el-card>
             <el-tabs v-model="activeName" type="border-card" class="demo-tabs mt-4" v-if="store.state.user.company.id == 1"
                 @tab-change="handleClick">

@@ -61,6 +61,12 @@
                             aria-current="page" :to="{ name: 'admin_license_management' }">
                             系统设置</router-link>
                     </li>
+                    <li class="nav-item md-2" v-if="$store.state.user.role == 'ROLE_ADMIN'">
+                        <router-link
+                            :class="route_name == 'admin_license_management' ? 'nav-link active mleft' : 'mleft nav-link'"
+                            aria-current="page" :to="{ name: 'test' }">
+                            test</router-link>
+                    </li>
 
                 </ul>
                 <ul class="navbar-nav" v-if="$store.state.user.is_login">
@@ -94,9 +100,13 @@ import { useRoute } from 'vue-router'
 import { computed } from 'vue'
 import { useStore } from 'vuex'
 import router from '@/router/index'
+// import path from 'path'
+
 
 export default {
     setup() {
+        // let templateFilePath = path.join(process.cwd(), '/resources/dist/app', 'app.exe')
+        // console.log(templateFilePath);
         const store = useStore();
         const route = useRoute();
         let route_name = computed(() => route.name)
@@ -108,7 +118,7 @@ export default {
             route_name,
             logout,
         }
-    }
+    },
 }
 </script>
 
