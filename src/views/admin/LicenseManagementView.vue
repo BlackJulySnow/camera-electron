@@ -3,90 +3,181 @@
         <div class="col-2"></div>
         <div class="col-8">
             <el-card>
-                <p>当前系统时间：{{ time }}</p>
+                <p>当前系统时间：{{ time }} &nbsp&nbsp&nbsp&nbsp 过期时间：{{ expireTime }}</p>
+                <p></p>
             </el-card>
-            <div class="card mt-4" v-if="store.state.user.company.id == 1">
-                <div class="card-header text-center">
-                    <h3>授权管理</h3>
-                    <el-row :gutter="20">
-                        <el-col :span="8">
-                            <el-date-picker v-model="startDate" type="datetime" placeholder="开始时间"
-                                value-format="YYYY-MM-DD HH:mm:ss" />
-                        </el-col>
-                        <el-col :span="8">
-                            <el-input placeholder="搜索企业名称" v-model="companyName" />
-                        </el-col>
-                    </el-row>
-                    <el-row class="mt-2" :gutter="20">
-                        <el-col :span="8">
-                            <el-date-picker v-model="endDate" type="datetime" placeholder="结束时间"
-                                value-format="YYYY-MM-DD HH:mm:ss" />
-                        </el-col>
-                        <el-col :span="8">
-                            <el-input placeholder="搜索企业号(英文逗号分割批量搜索)" v-model="companyId">
-                                <template #append>
-                                    <el-button @click="searchDialog = true">批量搜索</el-button>
-                                </template>
-                            </el-input>
-                        </el-col>
-                        <el-col :span="8">
-                            <el-button :icon="Search" circle type="success" @click="select()" />
-                        </el-col>
-                    </el-row>
-                </div>
-                <div class="card-body">
-                    <el-table :data="lisenceList" style="width: 100%" height="540" @sort-change="sortChange">
-                        <el-table-column label="序号">
-                            <template #default="scope">
-                                {{ (current_page - 1) * pageSize + scope.$index + 1 }}
+            <el-tabs v-model="activeName" type="border-card" class="demo-tabs mt-4" v-if="store.state.user.company.id == 1"
+                @tab-change="handleClick">
+                <el-tab-pane label="公司授权管理" name="first">
+                    <div class="card" v-if="store.state.user.company.id == 1">
+                        <div class="card-header text-center">
+                            <h3>授权管理</h3>
+                            <el-row :gutter="20">
+                                <el-col :span="8">
+                                    <el-date-picker v-model="startDate" type="datetime" placeholder="开始时间"
+                                        value-format="YYYY-MM-DD HH:mm:ss" />
+                                </el-col>
+                                <el-col :span="8">
+                                    <el-input placeholder="搜索企业名称" v-model="companyName" />
+                                </el-col>
+                                <el-col :span="8">
+                                    <el-input placeholder="搜索会员等级" v-model="vipLevel" />
+                                </el-col>
+                            </el-row>
+                            <el-row class="mt-2" :gutter="20">
+                                <el-col :span="8">
+                                    <el-date-picker v-model="endDate" type="datetime" placeholder="结束时间"
+                                        value-format="YYYY-MM-DD HH:mm:ss" />
+                                </el-col>
+                                <el-col :span="8">
+                                    <el-input placeholder="搜索企业号(英文逗号分割批量搜索)" v-model="companyId">
+                                        <template #append>
+                                            <el-button @click="searchDialog = true">批量搜索</el-button>
+                                        </template>
+                                    </el-input>
+                                </el-col>
+                                <el-col :span="8">
+                                    <el-button :icon="Search" circle type="success" @click="select()" />
+                                </el-col>
+                            </el-row>
+                        </div>
+                        <div class="card-body">
+                            <el-table :data="lisenceList" style="width: 100%" height="540" @sort-change="sortChange">
+                                <el-table-column label="序号">
+                                    <template #default="scope">
+                                        {{ (current_page - 1) * pageSize + scope.$index + 1 }}
+                                    </template>
+                                </el-table-column>
+                                <el-table-column prop="companyId" label="企业号" sortable="costom" />
+                                <el-table-column prop="companyName" label="企业名称" sortable="costom" />
+                                <el-table-column prop="endDate" label="过期时间" sortable="costom" />
+                                <el-table-column prop="vip.name" label="会员等级" sortable="costom" />
+                                <el-table-column width="150" align="right">
+                                    <template #header>
+                                        <el-button type="primary" plain @click="addDialog = true">新增</el-button>
+                                    </template>
+                                    <template #default="scope">
+                                        <el-button type="primary" :icon="Edit" circle @click="edit(scope.row)" />
+                                        <el-button type="danger" :icon="Delete" circle
+                                            @click="handleDelete(scope.row.id)" />
+                                    </template>
+                                </el-table-column>
+                            </el-table>
+                        </div>
+                        <el-dialog v-model="editDialog" title="编辑" width="30%" @close="handleEditClose">
+                            <el-form label-position="right" label-width="100px" :model="form" style="max-width: 460px">
+                                <el-form-item label="编号">
+                                    <el-input v-model="form.id" disabled />
+                                </el-form-item>
+                                <el-form-item label="企业号">
+                                    <el-input v-model="form.companyId" />
+                                </el-form-item>
+                                <el-form-item label="企业名">
+                                    <el-input v-model="form.companyName" />
+                                </el-form-item>
+                                <el-form-item label="过期时间">
+                                    <el-date-picker v-model="form.endDate" type="datetime"
+                                        value-format="YYYY-MM-DD HH:mm:ss" />
+                                </el-form-item>
+                                <el-form-item label="会员等级">
+                                    <el-select v-model="form.vipSelect" class="m-2" placeholder="Select">
+                                        <el-option v-for="vip in vipList" :key="vip.id" :label="vip.name" :value="vip.id" />
+                                    </el-select>
+                                </el-form-item>
+                                <el-form-item label="会员过期时间">
+                                    <el-date-picker v-model="form.expiresDate" type="datetime"
+                                        value-format="YYYY-MM-DD HH:mm:ss" />
+                                </el-form-item>
+                            </el-form>
+                            <template #footer>
+                                <span class="dialog-footer">
+                                    <el-button @click="editDialog = false">取消</el-button>
+                                    <el-button type="primary" @click="editCompany()">
+                                        修改
+                                    </el-button>
+                                </span>
                             </template>
-                        </el-table-column>
-                        <el-table-column prop="companyId" label="企业号" sortable="costom" />
-                        <el-table-column prop="companyName" label="企业名称" sortable="costom" />
-                        <el-table-column prop="endDate" label="过期时间" sortable="costom" />
-                        <el-table-column width="200" align="right">
-                            <template #header>
-                                <el-button type="primary" plain @click="addDialog = true">新增</el-button>
+                        </el-dialog>
+                        <div class="card-footer">
+                            <el-row justify="center">
+                                <el-pagination layout="total, sizes, prev, pager, next, jumper" :total="total"
+                                    :current_page="current_page" :page-sizes="[10, 50, 100]" :page-size="pageSize"
+                                    @current-change="handleCurrentChange" @size-change="handleSizeChange" />
+                            </el-row>
+                        </div>
+                    </div>
+                </el-tab-pane>
+                <el-tab-pane label="会员管理" name="second">
+                    <div class="card" v-if="store.state.user.company.id == 1">
+                        <div class="card-header text-center">
+                            <h3>会员管理</h3>
+                        </div>
+                        <div class="card-body">
+                            <el-table :data="vipList" style="width: 100%" height="540" @sort-change="sortChange">
+                                <el-table-column label="序号">
+                                    <template #default="scope">
+                                        {{ (current_page - 1) * pageSize + scope.$index + 1 }}
+                                    </template>
+                                </el-table-column>
+                                <el-table-column prop="name" label="会员制名称" sortable="costom" />
+                                <el-table-column prop="stationNum" label="授权工位数量" sortable="costom"
+                                    :formatter="numFormatter" />
+                                <el-table-column prop="renderNum" label="普通导出数量" sortable="costom"
+                                    :formatter="numFormatter" />
+                                <el-table-column prop="findNum" label="查询次数" sortable="costom" :formatter="numFormatter" />
+                                <el-table-column prop="watermarkRenderNum" label="水印导出数量" sortable="costom"
+                                    :formatter="numFormatter" />
+                                <el-table-column width="200" align="right">
+                                    <template #header>
+                                        <el-button type="primary" plain @click="addVipDialog = true">新增</el-button>
+                                    </template>
+                                    <template #default="scope">
+                                        <el-button type="primary" :icon="Edit" circle @click="editVip(scope.row)" />
+                                        <el-button type="danger" :icon="Delete" circle @click="deleteVip(scope.row.id)" />
+                                    </template>
+                                </el-table-column>
+                            </el-table>
+                        </div>
+                        <el-dialog v-model="editVipDialog" title="编辑(-1为无限次)" width="30%" @close="handleEditClose">
+                            <el-form label-position="right" label-width="100px" :model="form" style="max-width: 460px">
+                                <el-form-item label="编号">
+                                    <el-input v-model="form.id" disabled />
+                                </el-form-item>
+                                <el-form-item label="会员制名称">
+                                    <el-input v-model="form.name" />
+                                </el-form-item>
+                                <el-form-item label="授权工位数量">
+                                    <el-input type="number" v-model="form.stationNum" />
+                                </el-form-item>
+                                <el-form-item label="普通渲染数量">
+                                    <el-input type="number" v-model="form.renderNum" />
+                                </el-form-item>
+                                <el-form-item label="查询次数">
+                                    <el-input type="number" v-model="form.findNum" />
+                                </el-form-item>
+                                <el-form-item label="水印渲染数量">
+                                    <el-input type="number" v-model="form.watermarkRenderNum" />
+                                </el-form-item>
+                            </el-form>
+                            <template #footer>
+                                <span class="dialog-footer">
+                                    <el-button @click="editVipDialog = false">取消</el-button>
+                                    <el-button type="primary" @click="editVipS()">
+                                        修改
+                                    </el-button>
+                                </span>
                             </template>
-                            <template #default="scope">
-                                <el-button type="primary" :icon="Edit" circle @click="edit(scope.row)" />
-                                <el-button type="danger" :icon="Delete" circle @click="handleDelete(scope.row.id)" />
-                            </template>
-                        </el-table-column>
-                    </el-table>
-                </div>
-                <el-dialog v-model="editDialog" title="编辑" width="30%" @close="handleEditClose">
-                    <el-form label-position="right" label-width="100px" :model="form" style="max-width: 460px">
-                        <el-form-item label="编号">
-                            <el-input v-model="form.id" disabled />
-                        </el-form-item>
-                        <el-form-item label="企业号">
-                            <el-input v-model="form.companyId" />
-                        </el-form-item>
-                        <el-form-item label="企业名">
-                            <el-input v-model="form.companyName" />
-                        </el-form-item>
-                        <el-form-item label="过期时间">
-                            <el-date-picker v-model="form.endDate" type="datetime" value-format="YYYY-MM-DD HH:mm:ss" />
-                        </el-form-item>
-                    </el-form>
-                    <template #footer>
-                        <span class="dialog-footer">
-                            <el-button @click="editDialog = false">取消</el-button>
-                            <el-button type="primary" @click="editCompany()">
-                                修改
-                            </el-button>
-                        </span>
-                    </template>
-                </el-dialog>
-                <div class="card-footer">
-                    <el-row justify="center">
-                        <el-pagination layout="total, sizes, prev, pager, next, jumper" :total="total"
-                            :current_page="current_page" :page-sizes="[10, 50, 100]" :page-size="pageSize"
-                            @current-change="handleCurrentChange" @size-change="handleSizeChange" />
-                    </el-row>
-                </div>
-            </div>
+                        </el-dialog>
+                        <div class="card-footer">
+                            <el-row justify="center">
+                                <el-pagination layout="total, sizes, prev, pager, next, jumper" :total="totalVip"
+                                    :current_page="current_pageVip" :page-sizes="[10, 50, 100]" :page-size="pageSizeVip"
+                                    @current-change="handleVipCurrentChange" @size-change="handleVipSizeChange" />
+                            </el-row>
+                        </div>
+                    </div>
+                </el-tab-pane>
+            </el-tabs>
         </div>
         <el-dialog v-model="addDialog" title="新增" width="30%">
             <el-form label-position="right" label-width="100px" :model="form" style="max-width: 460px">
@@ -99,11 +190,46 @@
                 <el-form-item label="过期时间">
                     <el-date-picker v-model="form.endDate" type="datetime" value-format="YYYY-MM-DD HH:mm:ss" />
                 </el-form-item>
+                <el-form-item label="会员等级">
+                    <el-select v-model="form.vipSelect" class="m-2" placeholder="Select">
+                        <el-option v-for="vip in vipList" :key="vip.id" :label="vip.name" :value="vip.id" />
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="会员过期时间">
+                    <el-date-picker v-model="form.expiresDate" type="datetime" value-format="YYYY-MM-DD HH:mm:ss" />
+                </el-form-item>
             </el-form>
             <template #footer>
                 <span class="dialog-footer">
                     <el-button @click="addDialog = false">取消</el-button>
                     <el-button type="primary" @click="addLicense()">
+                        增加
+                    </el-button>
+                </span>
+            </template>
+        </el-dialog>
+        <el-dialog v-model="addVipDialog" title="新增(-1为无限次)" width="30%">
+            <el-form label-position="right" label-width="100px" :model="form" style="max-width: 460px">
+                <el-form-item label="会员制名称">
+                    <el-input v-model="form.name" />
+                </el-form-item>
+                <el-form-item label="授权工位数量">
+                    <el-input type="number" v-model="form.stationNum" />
+                </el-form-item>
+                <el-form-item label="普通渲染数量">
+                    <el-input type="number" v-model="form.renderNum" />
+                </el-form-item>
+                <el-form-item label="查询次数">
+                    <el-input type="number" v-model="form.findNum" />
+                </el-form-item>
+                <el-form-item label="水印渲染数量">
+                    <el-input type="number" v-model="form.watermarkRenderNum" />
+                </el-form-item>
+            </el-form>
+            <template #footer>
+                <span class="dialog-footer">
+                    <el-button @click="addVipDialog = false">取消</el-button>
+                    <el-button type="primary" @click="addVip()">
                         增加
                     </el-button>
                 </span>
@@ -141,17 +267,30 @@ export default {
             companyName: '',
             companyId: '',
             endDate: '',
+            vipSelect: '',
+            name: '',
+            stationNum: '',
+            renderNum: '',
+            findNum: '',
+            watermarkRenderNum: '',
+            expiresDate: '',
         })
 
+        let editVipDialog = ref(false);
         let timestamp = ref();
         let time = ref('');
         let timer;
         const store = useStore();
         let sortBy = ref("id");
+        let sortByVip = ref("id");
         let desc = ref(false);
+        let descVip = ref(false);
         let total = ref(0);
+        let totalVip = ref(0);
         let current_page = ref(1);
+        let current_pageVip = ref(1);
         let pageSize = ref(10);
+        let pageSizeVip = ref(10);
         let companyId = ref("");
         let companyName = ref("");
         let startDate = ref("");
@@ -159,6 +298,11 @@ export default {
         let searchDialog = ref(false);
         let searchId = ref("");
         let editDialog = ref(false);
+        let vipList = ref([])
+        let vipLevel = ref('');
+        let addVipDialog = ref(false);
+        const activeName = ref('first');
+        let expireTime = ref('');
 
         const timestampToTime = (timestamp) => {
             var date = new Date(timestamp);
@@ -198,6 +342,7 @@ export default {
                 companyId: companyId.value,
                 endDate: endDate.value,
                 startDate: startDate.value,
+                vipName: vipLevel.value,
             },
                 function success(resp) {
                     if (resp.code == '200') {
@@ -211,6 +356,40 @@ export default {
                 }
             )
         }
+
+        const getExpire = () => {
+            postRequest("/company/getExpired", {
+            }, function success(resp) {
+                if (resp.code == '200') {
+                    expireTime.value = resp.data;
+                } else {
+                    message(resp.msg, 'error');
+                }
+            }, function error(resp) {
+                message(resp.msg, 'error');
+            }
+            )
+        }
+
+        const selectVip = () => {
+            postRequest("/vip/select", {
+                page: current_pageVip.value,
+                size: pageSizeVip.value,
+                sortBy: sortByVip.value,
+                desc: descVip.value,
+            }, function success(resp) {
+                if (resp.code == '200') {
+                    totalVip.value = resp.data.totalElements;
+                    vipList.value = resp.data.content;
+                } else {
+                    message(resp.msg, 'error');
+                }
+            }, function error(resp) {
+                message(resp.msg, 'error');
+            }
+            )
+        }
+
         const sortChange = (column) => {
             const prop = column.prop
             if (prop) {
@@ -228,34 +407,46 @@ export default {
             }
         }
         select();
+        selectVip();
         getTime();
+        getExpire();
 
         return {
             lisenceList,
             addDialog,
+            editVipDialog,
+            vipLevel,
             getMachine,
             companyId,
             companyName,
+            addVipDialog,
+            totalVip,
             form,
             code,
             time,
             searchDialog,
             startDate,
             editDialog,
+            expireTime,
             endDate,
             timer,
             searchId,
             timestamp,
+            current_pageVip,
+            pageSizeVip,
             store,
+            vipList,
             total,
             pageSize,
             current_page,
             select,
+            selectVip,
             sortChange,
             timestampToTime,
             Delete,
             Edit,
             Search,
+            activeName
         }
     },
     methods: {
@@ -266,6 +457,14 @@ export default {
         handleCurrentChange(currentPage) {
             this.current_page = currentPage;
             this.select();
+        },
+        handleVipSizeChange(size) {
+            this.pageSizeVip = size;
+            this.selectVip();
+        },
+        handleVipCurrentChange(currentPage) {
+            this.current_pageVip = currentPage;
+            this.selectVip();
         },
         getMachineCode() {
             const that = this;
@@ -301,12 +500,35 @@ export default {
                 companyId: that.form.companyId,
                 companyName: that.form.companyName,
                 endDate: that.form.endDate,
+                vipSelect: that.form.vipSelect,
+                expiresDate: that.form.expiresDate,
             }, function success(resp) {
                 if (resp.code == '200') {
                     message(resp.msg, 'success');
                     that.addDialog = false;
                     that.handleEditClose();
                     that.select();
+                } else {
+                    message(resp.msg, 'warning');
+                }
+            }, function error() {
+                message("添加失败", 'error');
+            })
+        },
+        addVip() {
+            const that = this;
+            postRequest("/vip/add", {
+                name: that.form.name,
+                stationNum: that.form.stationNum,
+                renderNum: that.form.renderNum,
+                findNum: that.form.findNum,
+                watermarkRenderNum: that.form.watermarkRenderNum,
+            }, function success(resp) {
+                if (resp.code == '200') {
+                    message(resp.msg, 'success');
+                    that.addVipDialog = false;
+                    that.handleEditClose();
+                    that.selectVip();
                 } else {
                     message(resp.msg, 'warning');
                 }
@@ -354,7 +576,19 @@ export default {
             that.form.companyId = company.companyId;
             that.form.companyName = company.companyName;
             that.form.endDate = company.endDate;
+            that.form.vipSelect = company.vip.id;
+            that.form.expiresDate = company.expiresDate;
             that.editDialog = true;
+        },
+        editVip(vip) {
+            const that = this;
+            that.form.id = vip.id;
+            that.form.name = vip.name;
+            that.form.stationNum = vip.stationNum;
+            that.form.renderNum = vip.renderNum;
+            that.form.findNum = vip.findNum;
+            that.form.watermarkRenderNum = vip.watermarkRenderNum;
+            that.editVipDialog = true;
         },
         search() {
             this.companyId = this.searchId.replace(/\n/g, ",");
@@ -371,6 +605,8 @@ export default {
                 companyId: that.form.companyId,
                 companyName: that.form.companyName,
                 endDate: that.form.endDate,
+                vipSelect: that.form.vipSelect,
+                expiresDate: that.form.expiresDate,
             }, function success(resp) {
                 if (resp.code == '200') {
                     message('修改成功', 'success');
@@ -383,11 +619,68 @@ export default {
                 message('修改失败', 'error');
             })
         },
+        editVipS() {
+            const that = this;
+            postRequest("/vip/edit", {
+                id: that.form.id,
+                name: that.form.name,
+                stationNum: that.form.stationNum,
+                renderNum: that.form.renderNum,
+                findNum: that.form.findNum,
+                watermarkRenderNum: that.form.watermarkRenderNum,
+            }, function success(resp) {
+                if (resp.code == '200') {
+                    message('修改成功', 'success');
+                    that.editVipDialog = false;
+                    that.selectVip();
+                } else {
+                    message(resp.msg, 'warning');
+                }
+            }, function error() {
+                message('修改失败', 'error');
+            })
+        },
         handleEditClose() {
             this.form.id = "";
             this.form.companyName = "";
             this.form.companyId = "";
             this.form.endDate = "";
+            this.form.name = "";
+            this.form.stationNum = '';
+            this.form.renderNum = '';
+            this.form.findNum = '';
+            this.form.watermarkRenderNum = '';
+            this.form.expiresDate = '';
+        },
+        handleClick() {
+            console.log(this.activeName);
+            if (this.activeName == 'first') {
+                this.select();
+            } else {
+                this.selectVip();
+            }
+        },
+        numFormatter(row, col, cellValue) {
+            if (cellValue == -1) {
+                return "无限次";
+            } else {
+                return cellValue;
+            }
+        },
+        deleteVip(id) {
+            const that = this;
+            postRequest("/vip/delete", {
+                id: id,
+            }, function success(resp) {
+                if (resp.code == '200') {
+                    message(resp.msg, 'success');
+                    that.selectVip();
+                } else {
+                    message(resp.msg, 'warning');
+                }
+            }, function error() {
+                message("删除失败", 'error');
+            })
         }
     },
     created() {
