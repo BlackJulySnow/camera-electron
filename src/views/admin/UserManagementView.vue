@@ -110,8 +110,10 @@
                         </span>
                     </template>
                 </el-dialog>
-                <el-dialog v-model="imageDialog" title="Shipping address">
-                    <el-image style="width: 100px; height: 100px" :src="imgSrc" />
+                <el-dialog v-model="imageDialog" title="登录二维码">
+                    <el-row justify="center">
+                        <el-image :src="imgSrc" fit="cover" :preview-src-list="imageList" hide-on-click-modal="true" />
+                    </el-row>
                 </el-dialog>
                 <div class="card-footer">
                     <el-row justify="center">
@@ -128,12 +130,11 @@
 
 <script>
 import { ref } from 'vue';
-import { postRequest } from '@/utils/http';
+import { postRequest, imageRequest } from '@/utils/http';
 import { Delete, Edit } from '@element-plus/icons-vue'
 import { reactive } from 'vue'
 import { message } from '@/utils/messageBox';
 import { userRole } from "@/global";
-
 export default {
     setup() {
         const form = reactive({
@@ -156,6 +157,8 @@ export default {
         let groupList = ref([]);
         let imgSrc = ref('');
         let imageDialog = ref(false);
+        let imageList = ref([]);
+        // const store = useStore();
 
         const select = () => {
             postRequest("/user/select", {
@@ -210,6 +213,7 @@ export default {
         return {
             Edit,
             Delete,
+            // store,
             form,
             addDialog,
             imageDialog,
@@ -222,6 +226,7 @@ export default {
             groupList,
             userRole,
             imgSrc,
+            imageList,
             select,
             sortChange,
         }
@@ -320,12 +325,13 @@ export default {
         },
         ShowQrCode(id) {
             const that = this;
-            postRequest("/user/showQRCode", {
+            imageRequest("/user/showQRCode", {
                 uid: id,
             }, function success(resp) {
-                let blob = new Blob([resp], { type: "text/html" });
+                let blob = new Blob([resp], { type: "image/png" });
                 let url = window.URL.createObjectURL(blob);
                 that.imgSrc = url;
+                that.imageList = [url];
                 that.imageDialog = true;
             }, function error(resp) {
                 console.log(resp);

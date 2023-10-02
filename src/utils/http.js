@@ -70,3 +70,19 @@ export const flaskRequest = (url, params, success, error) => {
         error,
     });
 }
+
+export const imageRequest = (url, params, success, error) => {
+    return $.ajax({
+        url: base + url,
+        data: params,
+        xhrFields: {
+            responseType: "blob"
+        },
+        headers: {
+            Authorization: "Bearer " + store.state.user.jwtToken,
+        },
+        type: "post",
+        success,
+        error,
+    });
+}
