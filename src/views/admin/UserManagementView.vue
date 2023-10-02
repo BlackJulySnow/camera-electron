@@ -61,11 +61,12 @@
                         </el-table-column>
                         <el-table-column prop="role" label="权限" :formatter="roleFormatter" />
                         <el-table-column prop="group.name" label="组别" />
-                        <el-table-column>
+                        <el-table-column width="200">
                             <template #header>
                                 <el-input v-model="key" placeholder="姓名关键字" />
                             </template>
                             <template #default="scope">
+                                <el-button type="primary" @click="ShowQrCode(scope.row.id)">二维码</el-button>
                                 <el-button type="primary" :icon="Edit" circle @click="edit(scope.row)" />
                                 <el-button type="danger" :icon="Delete" circle @click="handleDelete(scope.row.id)" />
                             </template>
@@ -109,7 +110,9 @@
                         </span>
                     </template>
                 </el-dialog>
-
+                <el-dialog v-model="imageDialog" title="Shipping address">
+                    <el-image style="width: 100px; height: 100px" :src="imgSrc" />
+                </el-dialog>
                 <div class="card-footer">
                     <el-row justify="center">
                         <el-pagination layout="total, sizes, prev, pager, next, jumper" :total="total"
@@ -117,6 +120,7 @@
                             @current-change="handleCurrentChange" @size-change="handleSizeChange" />
                     </el-row>
                 </div>
+
             </div>
         </div>
     </div>
@@ -150,6 +154,8 @@ export default {
         let editDialog = ref(false);
         let key = ref('');
         let groupList = ref([]);
+        let imgSrc = ref('');
+        let imageDialog = ref(false);
 
         const select = () => {
             postRequest("/user/select", {
@@ -206,6 +212,7 @@ export default {
             Delete,
             form,
             addDialog,
+            imageDialog,
             userList,
             key,
             total,
@@ -214,6 +221,7 @@ export default {
             current_page,
             groupList,
             userRole,
+            imgSrc,
             select,
             sortChange,
         }
@@ -309,6 +317,19 @@ export default {
             that.form.password = '';
             that.form.group = user.group.id;
             that.editDialog = true;
+        },
+        ShowQrCode(id) {
+            const that = this;
+            postRequest("/user/showQRCode", {
+                uid: id,
+            }, function success(resp) {
+                let blob = new Blob([resp], { type: "text/html" });
+                let url = window.URL.createObjectURL(blob);
+                that.imgSrc = url;
+                that.imageDialog = true;
+            }, function error(resp) {
+                console.log(resp);
+            })
         }
     },
     watch: {

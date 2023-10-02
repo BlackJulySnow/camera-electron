@@ -253,7 +253,6 @@ import { getRequest, postRequest } from '@/utils/http';
 import { message } from '@/utils/messageBox';
 import { reactive, ref } from 'vue';
 import { Delete, Edit, Search } from '@element-plus/icons-vue'
-import Clipboard from 'clipboard';
 import { useStore } from 'vuex';
 
 export default {
@@ -475,24 +474,6 @@ export default {
                 }, function error() {
                     message('错误', 'error');
                 })
-        },
-        copy() {
-            const that = this;
-            let clipboard = new Clipboard('.none', {
-                text: () => {
-                    return that.code
-                }
-            });
-            clipboard.on('success', () => {
-                message('复制成功', 'success');
-                clipboard.destroy()
-                that.getMachine = false;
-                that.code = '';
-            })
-            clipboard.on('error', () => {
-                message('该浏览器不支持自动复制', 'error');
-                clipboard.destroy()
-            })
         },
         addLicense() {
             const that = this;

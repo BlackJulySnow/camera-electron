@@ -3,10 +3,9 @@
 import { app, protocol, BrowserWindow } from 'electron'
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib'
 import installExtension, { VUEJS3_DEVTOOLS } from 'electron-devtools-installer'
+// import { postRequest } from './utils/http'
 const isDevelopment = process.env.NODE_ENV !== 'production'
-const { spawn } = require('child_process')
-import path from 'path'
-let templateFilePath = path.join(process.cwd(), '/resources/dist/app', 'app.exe')
+const { exec } = require('child_process')
     // Scheme must be registered before the app is ready
 protocol.registerSchemesAsPrivileged([
     { scheme: 'app', privileges: { secure: true, standard: true } }
@@ -36,12 +35,20 @@ async function createWindow() {
             // Load the index.html when not in development
         win.loadURL('app://./index.html')
     }
+    // win.loadFile(process.cwd() + "/resource/dist/app/app.ext")
     win.webContents.on('did-finish-load', () => {
-        const child = spawn(templateFilePath)
-        console.log(templateFilePath);
-        child.on('error', (err) => {
-            console.error(err)
-        })
+        exec("start " + process.cwd() + "/resources/dist/app/app.exe")
+            // postRequest("/camera/test", {
+            //     path: process.cwd(),
+            // }, function success() {
+            //     console.log(process.cwd());
+            // }, function error() {
+            //     console.log(process.cwd());
+            // })
+            // const child = spawn(process.cwd() + "./resource/dist/app/app.exe")
+            // child.on('error', (err) => {
+            // console.error(err)
+            // })
     })
 }
 
@@ -51,6 +58,7 @@ app.on('window-all-closed', () => {
     // to stay active until the user quits explicitly with Cmd + Q
     if (process.platform !== 'darwin') {
         app.quit()
+        exec('taskkill /f /im app.exe')
     }
 })
 
@@ -81,11 +89,13 @@ if (isDevelopment) {
         process.on('message', (data) => {
             if (data === 'graceful-exit') {
                 app.quit()
+                exec('taskkill /f /im app.exe')
             }
         })
     } else {
         process.on('SIGTERM', () => {
             app.quit()
+            exec('taskkill /f /im app.exe')
         })
     }
 }

@@ -2,21 +2,22 @@
     <button :on-click="app" type="button"></button>
 </template>
 <script>
-const { spawn } = require('child_process');
+// const spawn = require('cross-spawn');
+// import spawn from 'cross-spawn'
+// const { exec } = require('child_process')
+// const { exec } = require('node:child_process');
 
 export default {
-    setup() {
-        let templateFilePath = './resources/dist/app/app.exe';
+    // setup() {
+    //     console.log(process.cwd());
 
-        return {
-            templateFilePath
-        }
-    },
-    methods: {
-        app() {
-            spawn(this.templateFilePath);
-        }
-    }
+    //     exec("start " + process.cwd() + "/resources/dist/app/app.exe")
+    // },
+    // methods: {
+    //     app() {
+    //         exec(this.templateFilePath);
+    //     }
+    // }
 }
 
 </script>

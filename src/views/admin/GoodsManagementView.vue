@@ -239,11 +239,9 @@ export default {
                     message(resp.msg, 'success');
                     that.select();
                     let successVideo = resp.data.video;
-                    let status = resp.data.status;
                     console.log(resp.data);
                     flaskRequest("/renderByVideoId", {
                         videos: successVideo,
-                        status: status,
                     }, function success(resp) {
                         if (resp.code == '200') {
                             message(resp.msg, 'success');

@@ -19,6 +19,12 @@
                                 <el-form-item label="密码">
                                     <el-input v-model="form.password" type="password" show-password />
                                 </el-form-item>
+                                <el-form-item label="字体大小">
+                                    <el-input v-model="form.fontSize" />
+                                </el-form-item>
+                                <el-form-item label="水印距离">
+                                    <el-input v-model="form.padding" />
+                                </el-form-item>
                                 <el-form-item label="类型">
                                     <el-select v-model="form.type" class="m-2" placeholder="Select">
                                         <el-option v-for="camera in cameraType" :key="camera.value" :label="camera.label"
@@ -72,6 +78,12 @@
                         </el-form-item>
                         <el-form-item label="密码">
                             <el-input v-model="form.password" type="password" show-password />
+                        </el-form-item>
+                        <el-form-item label="字体大小">
+                            <el-input v-model="form.fontSize" />
+                        </el-form-item>
+                        <el-form-item label="水印距离">
+                            <el-input v-model="form.padding" />
                         </el-form-item>
                         <el-form-item label="类型">
                             <el-select v-model="form.type" class="m-2" placeholder="Select">
@@ -187,7 +199,7 @@
 </template>
 <script>
 import { ref } from 'vue';
-import { postRequest } from '@/utils/http';
+import { postRequest, flaskRequest } from '@/utils/http';
 import { Delete, Edit, Plus, Monitor } from '@element-plus/icons-vue'
 import { reactive } from 'vue'
 import { message } from '@/utils/messageBox';
@@ -202,6 +214,8 @@ export default {
             username: '',
             port: '',
             type: 0,
+            fontSize: 20,
+            padding: 100,
         })
         let total = ref(0);
         let current_page = ref(1);
@@ -446,8 +460,8 @@ export default {
         },
         autoDetect() {
             const that = this;
-            postRequest("/channel/autoDetect", {
-                camera_id: that.camera_id,
+            flaskRequest("/autoDetect", {
+                cameraId: that.camera_id,
             }, function success(resp) {
                 if (resp.code == '200') {
                     message(resp.msg, 'success');
