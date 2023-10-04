@@ -169,10 +169,13 @@ export default {
                     goodsList.value = resp.data.content;
                     total.value = resp.data.totalElements;
                 } else {
-                    message(resp.msg, 'error');
+                    console.log(resp.msg);
+                    // message(resp.msg, 'error');
+                    // message(resp.responseJSON.msg, 'error');
                 }
             }, function error(resp) {
-                message(resp.msg, 'error');
+                // message(resp.msg, 'error');
+                message(resp.responseJSON.msg, 'error');
             })
         }
         const sortChange = (column) => {
@@ -254,8 +257,9 @@ export default {
                 } else {
                     message(resp.msg, 'error');
                 }
-            }, function error() {
-                message('添加导出队列失败', 'error');
+            }, function error(resp) {
+                message(resp.responseJSON.msg, 'error');
+                // message('添加导出队列失败', 'error');
             })
         },
         deleteGoods(id) {
@@ -269,8 +273,9 @@ export default {
                 } else {
                     message(resp.msg, 'error');
                 }
-            }, function error() {
-                message('删除失败', 'error');
+            }, function error(resp) {
+                message(resp.responseJSON.msg, 'error');
+                // message('删除失败', 'error');
             })
         },
         handleClose() {
@@ -330,8 +335,9 @@ export default {
         play(row) {
             // router.push({ name: 'video_view', params: { id: id } });
             // console.log(row.id, row.startTime.split(" ")[0]);
+            let size = "height=" + window.screen.availHeight + ",width=" + window.screen.availWidth;
             let routerUrl = router.resolve({ name: 'video_view', params: { time: row.startTime.split(" ")[0], id: row.id } });
-            window.open(routerUrl.href, "_blank");
+            window.open(routerUrl.href, "_blank", size);
         },
         Fresh(id) {
             const that = this;
@@ -345,7 +351,9 @@ export default {
                     message(resp.msg, 'error');
                 }
             }, function error(resp) {
-                message(resp.msg, 'error');
+                message(resp.responseJSON.msg, 'error');
+
+                // message(resp.msg, 'error');
             })
         },
         selectable(row) {

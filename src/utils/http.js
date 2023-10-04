@@ -1,5 +1,6 @@
 import $ from 'jquery'
 import store from '@/store'
+import { message } from '@/utils/messageBox';
 
 export var base;
 base = "http:" + '//' + "127.0.0.1";
@@ -12,7 +13,7 @@ base = "http:" + '//' + "127.0.0.1";
 //     base = "http:" + '//' + "127.0.0.1" + ":" + "80"
 // }
 export let flask = 'http://127.0.0.1:5000'
-export const postRequest = (url, params, success, error) => {
+export const postRequest = (url, params, success) => {
     return $.ajax({
         url: base + url,
         data: params,
@@ -21,10 +22,12 @@ export const postRequest = (url, params, success, error) => {
             Authorization: "Bearer " + store.state.user.jwtToken,
         },
         success,
-        error,
+        error(resp) {
+            message(resp.responseJSON.msg, 'error');
+        },
     });
 }
-export const getRequest = (url, params, success, error) => {
+export const getRequest = (url, params, success) => {
     return $.ajax({
         url: base + url,
         data: params,
@@ -33,7 +36,9 @@ export const getRequest = (url, params, success, error) => {
             Authorization: "Bearer " + store.state.user.jwtToken,
         },
         success,
-        error,
+        error(resp) {
+            message(resp.responseJSON.msg, 'error');
+        },
     });
 }
 
@@ -71,7 +76,7 @@ export const flaskRequest = (url, params, success, error) => {
     });
 }
 
-export const imageRequest = (url, params, success, error) => {
+export const imageRequest = (url, params, success) => {
     return $.ajax({
         url: base + url,
         data: params,
@@ -83,6 +88,8 @@ export const imageRequest = (url, params, success, error) => {
         },
         type: "post",
         success,
-        error,
+        error(resp) {
+            message(resp.responseJSON.msg, 'error');
+        },
     });
 }

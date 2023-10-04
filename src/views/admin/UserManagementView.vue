@@ -111,8 +111,9 @@
                     </template>
                 </el-dialog>
                 <el-dialog v-model="imageDialog" title="登录二维码">
+                    请用扫码枪扫描二维码进行登录
                     <el-row justify="center">
-                        <el-image :src="imgSrc" fit="cover" :preview-src-list="imageList" hide-on-click-modal="true" />
+                        <el-image :src="imgSrc" fit="cover" :preview-src-list="imageList" hide-on-click-modal />
                     </el-row>
                 </el-dialog>
                 <div class="card-footer">
@@ -174,8 +175,9 @@ export default {
                 } else {
                     message(resp.msg, 'error');
                 }
-            }, function error() {
-                message('查询失败', 'error');
+            }, function error(resp) {
+                // console.log();
+                message(resp.responseJSON.msg, 'error');
             })
         }
 
@@ -187,8 +189,8 @@ export default {
                 } else {
                     message(resp.msg, 'error');
                 }
-            }, function error() {
-                message('查询失败', 'error');
+            }, function error(resp) {
+                message(resp.responseJSON.msg, 'error');
             })
         }
 
@@ -266,8 +268,10 @@ export default {
                 }
                 that.addDialog = false;
                 that.select();
-            }, function error() {
-                message('添加失败', 'error');
+            }, function error(resp) {
+                // message('添加失败', 'error');
+                message(resp.responseJSON.msg, 'error');
+
             })
         },
         handleDelete(id) {
@@ -281,8 +285,9 @@ export default {
                 } else {
                     message(resp.msg, 'warning')
                 }
-            }, function error() {
-                message('删除失败', 'error');
+            }, function error(resp) {
+                message(resp.responseJSON.msg, 'error');
+                // message('删除失败', 'error');
             })
         },
         roleFormatter(row, column, cellValue) {
@@ -309,8 +314,9 @@ export default {
                 } else {
                     message(resp.msg, 'warning');
                 }
-            }, function error() {
-                message('修改失败', 'error');
+            }, function error(resp) {
+                message(resp.responseJSON.msg, 'error');
+                // message('修改失败', 'error');
             })
         },
         edit(user) {
@@ -334,7 +340,8 @@ export default {
                 that.imageList = [url];
                 that.imageDialog = true;
             }, function error(resp) {
-                console.log(resp);
+                // console.log(resp);
+                message(resp.responseJSON.msg, 'error');
             })
         }
     },

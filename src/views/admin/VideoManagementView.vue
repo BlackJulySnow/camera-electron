@@ -150,7 +150,8 @@ export default {
                     message(resp.msg, 'error');
                 }
             }, function error(resp) {
-                message(resp.msg, 'error');
+                message(resp.responseJSON.msg, 'error');
+                // message(resp.msg, 'error');
             })
         }
         const sortChange = (column) => {
@@ -270,12 +271,15 @@ export default {
                     message(resp.msg, 'error');
                 }
             }, function error(resp) {
-                message(resp.msg, 'error');
+                // message(resp.msg, 'error');
+                message(resp.responseJSON.msg, 'error');
             })
         },
         play(row) {
+            // let size = "height=" + window.screen.height + ",width=" + window.screen.width;
+            let size = "height=" + window.screen.availHeight + ",width=" + window.screen.availWidth;
             let routerUrl = router.resolve({ name: 'video_view', params: { time: row.startTime.split(" ")[0], id: row.id } });
-            window.open(routerUrl.href, "_blank");
+            window.open(routerUrl.href, "_blank", size);
         },
         search() {
             this.id = this.searchId.replace(/\n/g, ",");

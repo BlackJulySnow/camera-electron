@@ -255,8 +255,9 @@ export default {
                 } else {
                     message(resp.msg, 'error');
                 }
-            }, function error() {
-                message('摄像头查询失败', 'error');
+            }, function error(resp) {
+                // message('摄像头查询失败', 'error');
+                message(resp.responseJSON.msg, 'error');
             })
         }
 
@@ -373,8 +374,9 @@ export default {
                 }
                 that.addDialog = false;
                 that.select(1);
-            }, function error() {
-                message('添加失败', 'error');
+            }, function error(resp) {
+                message(resp.responseJSON.msg, 'error');
+                // message('添加失败', 'error');
             })
         },
         handleDelete(id) {
@@ -388,8 +390,9 @@ export default {
                 } else {
                     message(resp.msg, 'warning');
                 }
-            }, function error() {
-                message('删除失败', 'error');
+            }, function error(resp) {
+                message(resp.responseJSON.msg, 'error');
+                // message('删除失败', 'error');
             })
         },
         edit(camera) {
@@ -400,6 +403,8 @@ export default {
             that.form.password = camera.password;
             that.form.port = camera.port;
             that.form.type = camera.type;
+            that.form.fontSize = camera.fontSize;
+            that.form.padding = camera.padding;
             that.editDialog = true;
         },
         editUser() {
@@ -411,6 +416,8 @@ export default {
                 password: that.form.password,
                 port: that.form.port,
                 type: that.form.type,
+                fontSize: that.form.fontSize,
+                padding: that.form.padding,
             }, function success(resp) {
                 if (resp.code == '200') {
                     message('修改成功', 'success');
@@ -419,8 +426,9 @@ export default {
                 }
                 that.editDialog = false;
                 that.select(1);
-            }, function error() {
-                message('修改失败', 'error');
+            }, function error(resp) {
+                message(resp.responseJSON.msg, 'error');
+                // message('修改失败', 'error');
             })
         },
         channelDelete(id) {
@@ -434,8 +442,9 @@ export default {
                 } else {
                     message(resp.msg, 'warning');
                 }
-            }, function error() {
-                message('删除失败', 'error');
+            }, function error(resp) {
+                message(resp.responseJSON.msg, 'error');
+                // message('删除失败', 'error');
             })
         },
         addChannelFunc() {

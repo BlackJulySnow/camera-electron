@@ -1,10 +1,12 @@
 'use strict'
 
-import { app, protocol, BrowserWindow } from 'electron'
+import { app, protocol, BrowserWindow, Menu, screen } from 'electron'
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib'
 import installExtension, { VUEJS3_DEVTOOLS } from 'electron-devtools-installer'
+import { base } from './utils/http'
 // import { postRequest } from './utils/http'
 const isDevelopment = process.env.NODE_ENV !== 'production'
+
 const { exec } = require('child_process')
     // Scheme must be registered before the app is ready
 protocol.registerSchemesAsPrivileged([
@@ -13,10 +15,12 @@ protocol.registerSchemesAsPrivileged([
 
 async function createWindow() {
     // Create the browser window.
-    // Menu.setApplicationMenu(null);  // 去除菜单栏
+    let width = screen.getPrimaryDisplay().workAreaSize.width;
+    let height = screen.getPrimaryDisplay().workAreaSize.height;
+    Menu.setApplicationMenu(null); // 去除菜单栏
     const win = new BrowserWindow({
-        width: 800,
-        height: 600,
+        width: width - 100,
+        height: height - 100,
         webPreferences: {
 
             // Use pluginOptions.nodeIntegration, leave this alone
@@ -35,20 +39,8 @@ async function createWindow() {
             // Load the index.html when not in development
         win.loadURL('app://./index.html')
     }
-    // win.loadFile(process.cwd() + "/resource/dist/app/app.ext")
     win.webContents.on('did-finish-load', () => {
         exec("start " + process.cwd() + "/resources/dist/app/app.exe")
-            // postRequest("/camera/test", {
-            //     path: process.cwd(),
-            // }, function success() {
-            //     console.log(process.cwd());
-            // }, function error() {
-            //     console.log(process.cwd());
-            // })
-            // const child = spawn(process.cwd() + "./resource/dist/app/app.exe")
-            // child.on('error', (err) => {
-            // console.error(err)
-            // })
     })
 }
 
@@ -81,6 +73,18 @@ app.on('ready', async() => {
         }
     }
     createWindow()
+})
+app.on('openWindow', function(e, params) {
+    let video = new BrowserWindow({
+        width: screen.getPrimaryDisplay().workAreaSize.width,
+        height: screen.getPrimaryDisplay().workAreaSize.height,
+        webPreferences: {
+            nodeIntegration: process.env.ELECTRON_NODE_INTEGRATION,
+            contextIsolation: !process.env.ELECTRON_NODE_INTEGRATION,
+        }
+    })
+    video.loadURL(base + "/video/" + params.time + "/" + params.id)
+    video.on('closed', () => { video = null })
 })
 
 // Exit cleanly on request from parent process in development mode.
