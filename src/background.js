@@ -1,9 +1,8 @@
 'use strict'
 
-import { app, protocol, BrowserWindow, Menu, screen } from 'electron'
+import { app, protocol, BrowserWindow, screen } from 'electron'
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib'
 import installExtension, { VUEJS3_DEVTOOLS } from 'electron-devtools-installer'
-import { base } from './utils/http'
 // import { postRequest } from './utils/http'
 const isDevelopment = process.env.NODE_ENV !== 'production'
 
@@ -17,18 +16,19 @@ async function createWindow() {
     // Create the browser window.
     let width = screen.getPrimaryDisplay().workAreaSize.width;
     let height = screen.getPrimaryDisplay().workAreaSize.height;
-    Menu.setApplicationMenu(null); // 去除菜单栏
+    // Menu.setApplicationMenu(null); // 去除菜单栏
     const win = new BrowserWindow({
         width: width - 100,
         height: height - 100,
         webPreferences: {
-
             // Use pluginOptions.nodeIntegration, leave this alone
             // See nklayman.github.io/vue-cli-plugin-electron-builder/guide/security.html#node-integration for more info
             nodeIntegration: process.env.ELECTRON_NODE_INTEGRATION,
-            contextIsolation: !process.env.ELECTRON_NODE_INTEGRATION
+            contextIsolation: !process.env.ELECTRON_NODE_INTEGRATION,
+            enableremotemodule: true,
         }
     })
+    win.setMenu(null);
 
     if (process.env.WEBPACK_DEV_SERVER_URL) {
         // Load the url of the dev server if in development mode
@@ -74,18 +74,7 @@ app.on('ready', async() => {
     }
     createWindow()
 })
-app.on('openWindow', function(e, params) {
-    let video = new BrowserWindow({
-        width: screen.getPrimaryDisplay().workAreaSize.width,
-        height: screen.getPrimaryDisplay().workAreaSize.height,
-        webPreferences: {
-            nodeIntegration: process.env.ELECTRON_NODE_INTEGRATION,
-            contextIsolation: !process.env.ELECTRON_NODE_INTEGRATION,
-        }
-    })
-    video.loadURL(base + "/video/" + params.time + "/" + params.id)
-    video.on('closed', () => { video = null })
-})
+
 
 // Exit cleanly on request from parent process in development mode.
 if (isDevelopment) {

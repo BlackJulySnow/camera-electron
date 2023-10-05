@@ -314,7 +314,7 @@ export default {
             let now = new Date();
             let state;
             let d = parseInt((now - last) / 1000 / 60);
-            if (d >= 5) {
+            if (d >= 1) {
                 state = false;
             } else {
                 state = true;

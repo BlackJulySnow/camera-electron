@@ -50,31 +50,23 @@
                                 {{ (current_page - 1) * pageSize + scope.$index + 1 }}
                             </template>
                         </el-table-column>
-                        <!-- <el-table-column prop="createTime" label="扫描时间" width="200" sortable="costom"
-                            :formatter="timeFormatter" /> -->
                         <el-table-column prop="goods.scanTime" label="扫描时间" width="200" />
-                        <!-- <el-table-column prop="startTime" label="开始时间" sortable="costom" :formatter="timeFormatter" />
-                        <el-table-column prop="endTime" label="结束时间" sortable="costom" :formatter="timeFormatter" /> -->
-                        <!-- <el-table-column prop="scope" label="视频时长" :formatter="videoTimeFormatter" width="80" /> -->
-                        <!-- <el-table-column prop="renderStartTime" label="导出开始时间" sortable="costom"
-                            :formatter="timeFormatter" />
-                        <el-table-column prop="renderEndTime" label="导出结束时间" sortable="costom"
-                            :formatter="timeFormatter" /> -->
                         <el-table-column prop="goods.goodsId" label="单号" />
                         <el-table-column prop="goods.station.stationName" label="扫描工位" />
                         <el-table-column prop="state" label="视频状态" :formatter="stateFormatter" sortable="costom" />
                         <el-table-column align="right" width="200">
                             <template #default="scope">
-
+                                <el-button type="primary" @click="randerAgain(scope.row.id)"
+                                    v-if="scope.row.state == 5">重新导出</el-button>
                                 <el-button type="danger" @click="handleDelete(scope.row.id)"
-                                    v-if="scope.row.state != 4">删除</el-button>
-                                <el-button type="danger" @click="handleDelete(scope.row.id)" v-else>彻底删除</el-button>
-                                <!-- <el-button type="green" @click="handleDelete(scope.row.id)">重新</el-button> -->
-                                <el-link target="_blank" :href="'/video/stream/' + scope.row.id"
-                                    :disabled="scope.row.state != 2" :underline="false" style="margin: 0 10px">
-                                    <el-button type="success" :disabled="scope.row.state != 2" :icon="Download" circle>
-                                    </el-button>
-                                </el-link>
+                                    v-else-if="scope.row.state != 4">删除</el-button>
+                                <el-button type="danger" @click="handleDelete(scope.row.id)"
+                                    v-else-if="scope.row.state == 4">彻底删除</el-button>
+                                <!-- <el-input :disabled="scope.row.state != 2" :underline="false" style="margin: 0 10px"> -->
+                                <el-button type="success" :disabled="scope.row.state != 2" :icon="Download" circle
+                                    @click="downloadVideo(scope.row.id)">
+                                </el-button>
+                                <!-- </el-input> -->
                                 <el-button type="success" circle :icon="VideoPlay" @click="play(scope.row)"
                                     :disabled="scope.row.state != 2" />
                             </template>
@@ -132,7 +124,7 @@ export default {
         let searchId = ref("");
 
         const select = () => {
-            postRequest("/video/select", {
+            flaskRequest("/videoSelect", {
                 startTime: startTime.value,
                 endTime: endTime.value,
                 state: state.value,
@@ -238,17 +230,12 @@ export default {
         //     return (end - start) / 1000;
         // },
         stateFormatter(row, column, cellValue) {
-            if (cellValue == 0) {
-                return "导出中";
-            } else if (cellValue == 1) {
-                return "导出中";
-            } else if (cellValue == 2) {
-                return "导出完成";
-            } else if (cellValue == 3) {
-                return "导出错误";
-            } else if (cellValue == 4) {
-                return "导出视频已被删除";
+            for (let i = 0; i < stateType.length; i++) {
+                if (cellValue == stateType[i].value) {
+                    return stateType[i].label;
+                }
             }
+            return "错误";
         },
         handleDelete(id) {
             const that = this;
@@ -286,6 +273,29 @@ export default {
             this.select()
             this.searchDialog = false;
         },
+        randerAgain(video) {
+            flaskRequest("/renderByVideoId", {
+                "videos[]": video,
+            }, function success(resp) {
+                message(resp.msg, "success");
+            }, function error() {
+                message("导出错误", "error");
+            })
+        },
+        // downloadVideo(id) {
+        //     console.log(id);
+        //     const directoryHandle = window.showDirectoryPicker();
+        //     for await (const [name, handle] of directoryHandle.entries()) {
+        //         if (handle.kind === 'file') {
+        //             const fileHandle = await directoryHandle.getFileHandle(name);
+        //             console.log(fileHandle);
+        //         } else {
+        //             const directoryHandle = await directoryHandle.getDirectoryHandle(name);
+        //             console.log(directoryHandle);
+        //         }
+        //     }
+
+        // }
     },
 }
 </script>

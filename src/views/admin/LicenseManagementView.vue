@@ -26,10 +26,6 @@
                             </el-row>
                             <el-row class="mt-2" :gutter="20">
                                 <el-col :span="8">
-                                    <el-date-picker v-model="endDate" type="datetime" placeholder="结束时间"
-                                        value-format="YYYY-MM-DD HH:mm:ss" />
-                                </el-col>
-                                <el-col :span="8">
                                     <el-input placeholder="搜索企业号(英文逗号分割批量搜索)" v-model="companyId">
                                         <template #append>
                                             <el-button @click="searchDialog = true">批量搜索</el-button>
@@ -50,7 +46,6 @@
                                 </el-table-column>
                                 <el-table-column prop="companyId" label="企业号" sortable="costom" />
                                 <el-table-column prop="companyName" label="企业名称" sortable="costom" />
-                                <el-table-column prop="endDate" label="过期时间" sortable="costom" />
                                 <el-table-column prop="vip.name" label="会员等级" sortable="costom" />
                                 <el-table-column width="150" align="right">
                                     <template #header>
@@ -74,10 +69,6 @@
                                 </el-form-item>
                                 <el-form-item label="企业名">
                                     <el-input v-model="form.companyName" />
-                                </el-form-item>
-                                <el-form-item label="过期时间">
-                                    <el-date-picker v-model="form.endDate" type="datetime"
-                                        value-format="YYYY-MM-DD HH:mm:ss" />
                                 </el-form-item>
                                 <el-form-item label="会员等级">
                                     <el-select v-model="form.vipSelect" class="m-2" placeholder="Select">
@@ -187,9 +178,6 @@
                 <el-form-item label="企业名">
                     <el-input v-model="form.companyName" />
                 </el-form-item>
-                <el-form-item label="过期时间">
-                    <el-date-picker v-model="form.endDate" type="datetime" value-format="YYYY-MM-DD HH:mm:ss" />
-                </el-form-item>
                 <el-form-item label="会员等级">
                     <el-select v-model="form.vipSelect" class="m-2" placeholder="Select">
                         <el-option v-for="vip in vipList" :key="vip.id" :label="vip.name" :value="vip.id" />
@@ -265,7 +253,6 @@ export default {
             id: '',
             companyName: '',
             companyId: '',
-            endDate: '',
             vipSelect: '',
             name: '',
             stationNum: '',
@@ -293,7 +280,6 @@ export default {
         let companyId = ref("");
         let companyName = ref("");
         let startDate = ref("");
-        let endDate = ref("");
         let searchDialog = ref(false);
         let searchId = ref("");
         let editDialog = ref(false);
@@ -339,7 +325,6 @@ export default {
                 desc: desc.value,
                 companyName: companyName.value,
                 companyId: companyId.value,
-                endDate: endDate.value,
                 startDate: startDate.value,
                 vipName: vipLevel.value,
             },
@@ -427,7 +412,6 @@ export default {
             startDate,
             editDialog,
             expireTime,
-            endDate,
             timer,
             searchId,
             timestamp,
@@ -480,7 +464,6 @@ export default {
             postRequest("/company/add", {
                 companyId: that.form.companyId,
                 companyName: that.form.companyName,
-                endDate: that.form.endDate,
                 vipSelect: that.form.vipSelect,
                 expiresDate: that.form.expiresDate,
             }, function success(resp) {
@@ -556,7 +539,6 @@ export default {
             that.form.id = company.id;
             that.form.companyId = company.companyId;
             that.form.companyName = company.companyName;
-            that.form.endDate = company.endDate;
             that.form.vipSelect = company.vip.id;
             that.form.expiresDate = company.expiresDate;
             that.editDialog = true;
@@ -585,7 +567,6 @@ export default {
                 id: that.form.id,
                 companyId: that.form.companyId,
                 companyName: that.form.companyName,
-                endDate: that.form.endDate,
                 vipSelect: that.form.vipSelect,
                 expiresDate: that.form.expiresDate,
             }, function success(resp) {
@@ -625,7 +606,6 @@ export default {
             this.form.id = "";
             this.form.companyName = "";
             this.form.companyId = "";
-            this.form.endDate = "";
             this.form.name = "";
             this.form.stationNum = '';
             this.form.renderNum = '';

@@ -54,7 +54,7 @@
                         <el-table-column prop="port" label="端口" sortable="costom" />
                         <el-table-column prop="type" label="类型" :formatter="Formatter" />
                         <el-table-column prop="username" label="用户名" />
-                        <el-table-column prop="password" label="密码" :formatter="passwordFormatter" />
+                        <!-- <el-table-column prop="password" label="密码" :formatter="passwordFormatter" /> -->
                         <el-table-column width="300">
                             <template #default="scope">
                                 <el-button type="warning" round @click="channelSelect(scope.row.id)">通道编辑</el-button>
@@ -463,8 +463,6 @@ export default {
                 } else {
                     message(resp.msg, 'warning');
                 }
-            }, function error() {
-                message('添加失败', 'error');
             })
         },
         autoDetect() {

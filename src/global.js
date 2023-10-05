@@ -17,6 +17,10 @@ export const stateType = [{
         value: 0,
     },
     {
+        label: "导出中",
+        value: 1,
+    },
+    {
         label: "导出完成",
         value: 2,
     },
@@ -27,13 +31,17 @@ export const stateType = [{
     {
         label: "导出结果已被删除",
         value: 4,
+    },
+    {
+        label: "本地不存在视频",
+        value: 5,
     }
 ]
 
 export const userRole = [{
     label: '员工',
     value: 'ROLE_USER'
-},{
+}, {
     label: '管理员',
     value: 'ROLE_ADMIN'
 }]
