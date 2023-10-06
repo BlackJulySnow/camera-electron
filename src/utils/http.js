@@ -3,8 +3,8 @@ import store from '@/store'
 import { message } from '@/utils/messageBox';
 
 export var base;
-base = "http:" + '//' + "127.0.0.1";
-// base = "http:" + '//' + "106.55.62.69";
+// base = "http:" + '//' + "127.0.0.1";
+base = "http:" + '//' + "106.55.62.69";
 // if (process.env.NODE_ENV === 'development') { //如果是开发环境
 //     // base = window.location.protocol + '//' + "127.0.0.1";
 //     base = "http:" + '//' + "127.0.0.1";

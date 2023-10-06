@@ -54,10 +54,9 @@
                         <el-table-column prop="goods.goodsId" label="单号" />
                         <el-table-column prop="goods.station.stationName" label="扫描工位" />
                         <el-table-column prop="state" label="视频状态" :formatter="stateFormatter" sortable="costom" />
-                        <el-table-column prop="company.companyName" label="公司名称" v-if="$store.state.user.company.id == 1" />
                         <el-table-column align="right" width="200">
                             <template #default="scope">
-                                <el-button type="primary" @click="randerAgain(scope.row.id)"
+                                <el-button type="primary" @click="randerAgain(scope.row)"
                                     v-if="scope.row.state == 5">重新导出</el-button>
                                 <el-button type="danger" @click="handleDelete(scope.row.id)"
                                     v-else-if="scope.row.state != 4">删除</el-button>
@@ -282,12 +281,13 @@ export default {
             this.searchDialog = false;
         },
         randerAgain(video) {
-            const that = this;
+            // const that = this;
             flaskRequest("/renderByVideoId", {
-                "videos[]": video,
+                "videos[]": video.id,
             }, function success(resp) {
                 message(resp.msg, "success");
-                that.select();
+                // that.select();
+                video.state = 1;
             }, function error() {
                 message("导出错误", "error");
             })
