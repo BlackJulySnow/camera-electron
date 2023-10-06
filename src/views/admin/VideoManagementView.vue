@@ -8,7 +8,7 @@
                     <el-row :gutter="20">
                         <el-col :span="8">
                             <el-date-picker v-model="startTime" type="datetime" placeholder="开始时间"
-                                value-format="YYYY-MM-DD HH:mm:ss" />
+                                value-format="YYYY-MM-DD HH:mm:ss" style="width:100%" />
                         </el-col>
                         <el-col :span="8">
                             <el-input placeholder="搜索工位名称" v-model="stationName" />
@@ -29,7 +29,7 @@
                     <el-row class="mt-2" :gutter="20">
                         <el-col :span="8">
                             <el-date-picker v-model="endTime" type="datetime" placeholder="结束时间"
-                                value-format="YYYY-MM-DD HH:mm:ss" />
+                                value-format="YYYY-MM-DD HH:mm:ss" style="width:100%" />
                         </el-col>
                         <el-col :span="8">
                             <el-input placeholder="搜索订单(英文逗号分割批量搜索)" v-model="id">
@@ -54,6 +54,7 @@
                         <el-table-column prop="goods.goodsId" label="单号" />
                         <el-table-column prop="goods.station.stationName" label="扫描工位" />
                         <el-table-column prop="state" label="视频状态" :formatter="stateFormatter" sortable="costom" />
+                        <el-table-column prop="company.companyName" label="公司名称" v-if="$store.state.user.company.id == 1" />
                         <el-table-column align="right" width="200">
                             <template #default="scope">
                                 <el-button type="primary" @click="randerAgain(scope.row.id)"
@@ -62,13 +63,18 @@
                                     v-else-if="scope.row.state != 4">删除</el-button>
                                 <el-button type="danger" @click="handleDelete(scope.row.id)"
                                     v-else-if="scope.row.state == 4">彻底删除</el-button>
-                                <!-- <el-input :disabled="scope.row.state != 2" :underline="false" style="margin: 0 10px"> -->
                                 <el-button type="success" :disabled="scope.row.state != 2" :icon="Download" circle
-                                    @click="downloadVideo(scope.row.id)">
-                                </el-button>
-                                <!-- </el-input> -->
+                                    @click="downloadVideo(scope.row.id, scope.row.startTime, scope.row.goods.goodsId)"></el-button>
+
+                                <!-- <el-button type="success" :disabled="scope.row.state != 2" :icon="Download" circle
+                                         @click="downloadVideo(scope.row.id)">
+                                    </el-button> -->
+                                <!-- </input> -->
                                 <el-button type="success" circle :icon="VideoPlay" @click="play(scope.row)"
                                     :disabled="scope.row.state != 2" />
+                                <!-- <input type="file" :disabled="scope.row.state != 2" :underline="false"
+                                    style="margin: 0 10px; " webkitdirectory :id="fileLoadId(scope.row.id)"
+                                    @input="filePathChange(scope.row.id)"> -->
                             </template>
                         </el-table-column>
                     </el-table>
@@ -122,6 +128,7 @@ export default {
         let searchDialog = ref(false);
         let id = ref("");
         let searchId = ref("");
+        let filePath = ref("");
 
         const select = () => {
             flaskRequest("/videoSelect", {
@@ -176,6 +183,7 @@ export default {
             select,
             sortChange,
             Search,
+            filePath,
             state,
             stateType,
             playDialog,
@@ -274,29 +282,34 @@ export default {
             this.searchDialog = false;
         },
         randerAgain(video) {
+            const that = this;
             flaskRequest("/renderByVideoId", {
                 "videos[]": video,
             }, function success(resp) {
                 message(resp.msg, "success");
+                that.select();
             }, function error() {
                 message("导出错误", "error");
             })
         },
-        // downloadVideo(id) {
-        //     console.log(id);
-        //     const directoryHandle = window.showDirectoryPicker();
-        //     for await (const [name, handle] of directoryHandle.entries()) {
-        //         if (handle.kind === 'file') {
-        //             const fileHandle = await directoryHandle.getFileHandle(name);
-        //             console.log(fileHandle);
-        //         } else {
-        //             const directoryHandle = await directoryHandle.getDirectoryHandle(name);
-        //             console.log(directoryHandle);
-        //         }
-        //     }
+        downloadVideo(id, startTime, goodsId) {
+            flaskRequest("/fileLoad", {
+                id: id,
+                startTime: startTime,
+                goodsId: goodsId
+            },
+                function success(resp) {
+                    if (resp.code == 200) {
+                        message(resp.msg, "success");
+                    } else {
+                        message(resp.msg, "warning");
+                    }
+                }, function error(resp) {
+                    message(resp.responseJSON.msg, "error");
+                })
 
-        // }
-    },
+        }
+    }
 }
 </script>
 

@@ -8,7 +8,7 @@
                     <el-row :gutter="20">
                         <el-col :span="8">
                             <el-date-picker v-model="startTime" type="datetime" placeholder="开始时间"
-                                value-format="YYYY-MM-DD HH:mm:ss" />
+                                value-format="YYYY-MM-DD HH:mm:ss" style="width:100%" />
                         </el-col>
                         <el-col :span="8">
                             <el-input placeholder="搜索工位名称" v-model="stationName" />
@@ -22,7 +22,7 @@
                     <el-row class="mt-2" :gutter="20">
                         <el-col :span="8">
                             <el-date-picker v-model="endTime" type="datetime" placeholder="结束时间"
-                                value-format="YYYY-MM-DD HH:mm:ss" />
+                                value-format="YYYY-MM-DD HH:mm:ss" style="width:100%" />
                         </el-col>
                         <el-col :span="8">
                             <el-input placeholder="搜索订单(英文逗号分割批量搜索)" v-model="id">
@@ -48,6 +48,7 @@
                         <el-table-column prop="goodsId" label="订单编号" sortable="costom" />
                         <el-table-column prop="scanTime" label="扫描时间" sortable="costom" />
                         <el-table-column prop="station['stationName']" label="工位名称" />
+                        <el-table-column prop="company.companyName" label="公司名称" v-if="$store.state.user.company.id == 1" />
                         <el-table-column align="right" width="300">
                             <template #header>
                                 <el-button type="danger" round @click="deleteAll" :disabled="allDisable">

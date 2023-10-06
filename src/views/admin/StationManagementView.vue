@@ -9,19 +9,19 @@
                         <el-dialog v-model="addDialog" title="工位设置" width="30%" @close="handleClear">
                             <el-form label-position="right" label-width="100px" :model="form" style="max-width: 460px">
                                 <el-form-item label="工位IP">
-                                    <el-input v-model="form.stationIp" />
+                                    <el-input v-model="form.stationIp" placeholder="请输入工位ip" />
                                 </el-form-item>
                                 <el-form-item label="工位名称">
-                                    <el-input v-model="form.stationName" />
+                                    <el-input v-model="form.stationName" placeholder="请输入工位名称" />
                                 </el-form-item>
                                 <el-form-item label="工位扫描类型">
-                                    <el-input v-model="form.stationType" />
+                                    <el-input v-model="form.stationType" placeholder="请输入工位扫描类型" />
                                 </el-form-item>
                                 <el-form-item label="向前回溯时间">
-                                    <el-input v-model="form.backtrack1" />
+                                    <el-input v-model="form.backtrack1" placeholder="请输入向前回溯时间" />
                                 </el-form-item>
                                 <el-form-item label="向后回溯时间">
-                                    <el-input v-model="form.backtrack2" />
+                                    <el-input v-model="form.backtrack2" placeholder="请输入向后回溯时间" />
                                 </el-form-item>
                                 <!-- <el-form-item label="导出超时时间">
                                     <el-input v-model="form.timeout" />
@@ -29,14 +29,14 @@
 
 
                                 <el-form-item label="录像机">
-                                    <el-select v-model="form.cameraId" placeholder="选择录像机">
+                                    <el-select v-model="form.cameraId" placeholder="选择录像机" style="width:100%">
                                         <el-option v-for="camera in cameraList" :key="camera.id" :label="camera.ip"
                                             :value="camera.id" />
                                     </el-select>
                                 </el-form-item>
                                 <el-form-item label="通道">
                                     <el-select v-model="form.channels" placeholder="选择通道" multiple collapse-tags
-                                        collapse-tags-tooltip :max-collapse-tags="2" :multiple-limit="2">
+                                        collapse-tags-tooltip :max-collapse-tags="2" :multiple-limit="2" style="width:100%">
                                         <el-option v-for="channel in channelList" :key="channel.id"
                                             :label="channel.channelName" :value="channel.id" />
                                     </el-select>
@@ -66,13 +66,14 @@
                         <el-table-column prop="stationName" label="工位名称" sortable="costom" />
                         <el-table-column prop="stationIp" label="工位IP" sortable="costom" />
                         <el-table-column prop="stationType" label="工位扫描类型" sortable="costom" />
+                        <el-table-column prop="company.companyName" label="公司名称" v-if="$store.state.user.company.id == 1" />
                         <el-table-column prop="lastUploadTime" label="在线情况" sortable="costom">
                             <template #default="scope">
                                 <el-button type="success" v-if="status(scope.row.lastUploadTime)">在线</el-button>
                                 <el-button type="danger" v-else>离线</el-button>
                             </template>
                         </el-table-column>
-                        <el-table-column width="200" align="right">
+                        <el-table-column width="150" align="right">
                             <template #default="scope">
                                 <el-button type="primary" :icon="Edit" circle @click="edit(scope.row)" />
                                 <el-button type="danger" :icon="Delete" circle @click="handleDelete(scope.row.id)" />

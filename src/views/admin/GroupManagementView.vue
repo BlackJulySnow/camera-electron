@@ -33,6 +33,7 @@
                         </el-table-column>
                         <el-table-column prop="id" label="编号" sortable="custom" />
                         <el-table-column prop="name" label="组名" sortable="custom" />
+                        <el-table-column prop="company.companyName" label="公司名称" v-if="$store.state.user.company.id == 1" />
                         <el-table-column>
                             <template #header>
                                 <el-button class="float-end" type="primary" plain @click="addDialog = true">新增</el-button>

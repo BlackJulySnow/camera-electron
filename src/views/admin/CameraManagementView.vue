@@ -8,25 +8,26 @@
                         <el-dialog v-model="addDialog" title="新增" width="30%">
                             <el-form label-position="right" label-width="100px" :model="form" style="max-width: 460px">
                                 <el-form-item label="录像机ip">
-                                    <el-input v-model="form.ip" />
+                                    <el-input v-model="form.ip" placeholder="请输入ip" />
                                 </el-form-item>
                                 <el-form-item label="录像机端口">
-                                    <el-input v-model="form.port" />
+                                    <el-input v-model="form.port" placeholder="请输入端口" />
                                 </el-form-item>
                                 <el-form-item label="用户名">
-                                    <el-input v-model="form.username" />
+                                    <el-input v-model="form.username" placeholder="请输入摄像机用户名" />
                                 </el-form-item>
                                 <el-form-item label="密码">
-                                    <el-input v-model="form.password" type="password" show-password />
+                                    <el-input v-model="form.password" type="password" show-password
+                                        placeholder="请输入摄像机密码" />
                                 </el-form-item>
                                 <el-form-item label="字体大小">
-                                    <el-input v-model="form.fontSize" />
+                                    <el-input v-model="form.fontSize" placeholder="请输入水印字体大小" />
                                 </el-form-item>
                                 <el-form-item label="水印距离">
-                                    <el-input v-model="form.padding" />
+                                    <el-input v-model="form.padding" placeholder="请输入水印距离" />
                                 </el-form-item>
                                 <el-form-item label="类型">
-                                    <el-select v-model="form.type" class="m-2" placeholder="Select">
+                                    <el-select v-model="form.type" placeholder="请选择摄像机类型" style="width:100%">
                                         <el-option v-for="camera in cameraType" :key="camera.value" :label="camera.label"
                                             :value="camera.value" />
                                     </el-select>
@@ -50,9 +51,10 @@
                                 {{ (current_page - 1) * pageSize + scope.$index + 1 }}
                             </template>
                         </el-table-column>
-                        <el-table-column prop="ip" label="ip" sortable="costom" />
+                        <el-table-column prop="ip" label="ip" sortable="costom" width="100" />
                         <el-table-column prop="port" label="端口" sortable="costom" />
                         <el-table-column prop="type" label="类型" :formatter="Formatter" />
+                        <el-table-column prop="company.companyName" label="公司名称" v-if="$store.state.user.company.id == 1" />
                         <el-table-column prop="username" label="用户名" />
                         <!-- <el-table-column prop="password" label="密码" :formatter="passwordFormatter" /> -->
                         <el-table-column width="300">
@@ -68,25 +70,25 @@
                 <el-dialog v-model="editDialog" title="编辑" width="30%">
                     <el-form label-position="right" label-width="100px" :model="form" style="max-width: 460px">
                         <el-form-item label="录像机ip">
-                            <el-input v-model="form.ip" />
+                            <el-input v-model="form.ip" placeholder="请输入ip" />
                         </el-form-item>
                         <el-form-item label="录像机端口">
-                            <el-input v-model="form.port" />
+                            <el-input v-model="form.port" placeholder="请输入端口" />
                         </el-form-item>
                         <el-form-item label="用户名">
-                            <el-input v-model="form.username" />
+                            <el-input v-model="form.username" placeholder="请输入摄像机用户名" />
                         </el-form-item>
                         <el-form-item label="密码">
-                            <el-input v-model="form.password" type="password" show-password />
+                            <el-input v-model="form.password" type="password" show-password placeholder="请输入摄像机密码" />
                         </el-form-item>
                         <el-form-item label="字体大小">
-                            <el-input v-model="form.fontSize" />
+                            <el-input v-model="form.fontSize" placeholder="请输入水印字体大小" />
                         </el-form-item>
                         <el-form-item label="水印距离">
-                            <el-input v-model="form.padding" />
+                            <el-input v-model="form.padding" placeholder="请输入水印距离" />
                         </el-form-item>
                         <el-form-item label="类型">
-                            <el-select v-model="form.type" class="m-2" placeholder="Select">
+                            <el-select v-model="form.type" style="width:100%" placeholder="请选择摄像机类型">
                                 <el-option v-for="camera in cameraType" :key="camera.value" :label="camera.label"
                                     :value="camera.value" />
                             </el-select>
@@ -113,8 +115,8 @@
     </div>
     <el-dialog v-model="editChannel" title="编辑通道" width="30%">
         <el-table :data="channelList" style="width: 100%" height="540">
-            <el-table-column align="center" prop="channelName" label="通道名称" sortable />
-            <el-table-column align="center" prop="channel" label="通道号" sortable />
+            <el-table-column align="center" prop="channelName" class="m-2" label="通道名称" sortable />
+            <el-table-column align="center" prop="channel" class="m-2" label="通道号" sortable />
             <el-table-column width="100" align="right">
                 <template #default="scope">
                     <el-button type="danger" :icon="Delete" circle @click="channelDelete(scope.row.id)" />
@@ -130,8 +132,8 @@
         </template>
     </el-dialog>
     <el-dialog v-model="addChannel" title="添加通道" width="30%">
-        <el-input v-model="channel" placeholder="通道号" />
-        <el-input v-model="channelName" placeholder="通道名称" />
+        <el-input v-model="channel" placeholder="通道号" class="mt-2" />
+        <el-input v-model="channelName" placeholder="通道名称" class="mt-2" />
         <template #footer>
             <span class="dialog-footer">
 
@@ -172,8 +174,8 @@
                 <span class="ml-3 w-35 text-gray-600 inline-flex items-center">显示位置</span>
             </el-col>
             <el-col :span="20">
-                <el-select v-model="position" :disabled="inputDisabled">
-                    <el-option label="左上" :value="0"></el-option>
+                <el-select v-model="position" :disabled="inputDisabled" style="width: 100%">
+                    <el-option label=" 左上" :value="0"></el-option>
                     <el-option label="左下" :value="1"></el-option>
                     <el-option label="右上" :value="2"></el-option>
                     <el-option label="右下" :value="3"></el-option>

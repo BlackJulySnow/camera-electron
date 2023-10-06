@@ -14,17 +14,25 @@
                             <h3>授权管理</h3>
                             <el-row :gutter="20">
                                 <el-col :span="8">
-                                    <el-date-picker v-model="startDate" type="datetime" placeholder="开始时间"
-                                        value-format="YYYY-MM-DD HH:mm:ss" />
+                                    <el-select v-model="businessType" placeholder="搜索业务类型" style="width: 100%;">
+                                        <el-option v-for="businessType in businessTypes" :key="businessType.value"
+                                            :label="businessType.label" :value="businessType.value" />
+                                    </el-select>
+                                </el-col>
+                                <el-col :span="8">
+                                    <el-input placeholder="搜索企业代表人姓名" v-model="userName" />
                                 </el-col>
                                 <el-col :span="8">
                                     <el-input placeholder="搜索企业名称" v-model="companyName" />
                                 </el-col>
-                                <el-col :span="8">
-                                    <el-input placeholder="搜索会员等级" v-model="vipLevel" />
-                                </el-col>
                             </el-row>
                             <el-row class="mt-2" :gutter="20">
+                                <el-col :span="8">
+                                    <el-select v-model="platform" placeholder="搜索电商平台" style="width: 100%;">
+                                        <el-option v-for="commerce1 in commerce" :key="commerce1.value"
+                                            :label="commerce1.label" :value="commerce1.value" />
+                                    </el-select>
+                                </el-col>
                                 <el-col :span="8">
                                     <el-input placeholder="搜索企业号(英文逗号分割批量搜索)" v-model="companyId">
                                         <template #append>
@@ -39,19 +47,45 @@
                         </div>
                         <div class="card-body">
                             <el-table :data="lisenceList" style="width: 100%" height="540" @sort-change="sortChange">
-                                <el-table-column label="序号">
+                                <el-table-column label="序号" fixed>
                                     <template #default="scope">
                                         {{ (current_page - 1) * pageSize + scope.$index + 1 }}
                                     </template>
                                 </el-table-column>
-                                <el-table-column prop="companyId" label="企业号" sortable="costom" />
-                                <el-table-column prop="companyName" label="企业名称" sortable="costom" />
-                                <el-table-column prop="vip.name" label="会员等级" sortable="costom" />
-                                <el-table-column width="150" align="right">
+                                <el-table-column prop="companyId" label="企业号" sortable="costom" width="110" />
+                                <el-table-column prop="companyName" label="企业名称" sortable="costom" width="110" />
+                                <el-table-column prop="userName" label="代表人姓名" width="110" />
+                                <el-table-column prop="phone" label="电话" width="110" />
+                                <el-table-column prop="type" label="业务类型" />
+                                <el-table-column prop="platform" label="电商平台" />
+                                <el-table-column prop="address" label="地址" width="150" />
+                                <el-table-column prop="vip.name" label="会员等级" sortable="costom" width="110" />
+                                <el-table-column prop="expiresDate" label="过期时间" sortable="costom" width="180" />
+                                <el-table-column prop="status" label="审核状态" sortable="costom" width="120"
+                                    :formatter="statusFormatter" />
+                                <el-table-column width="180" align="right" fixed="right">
                                     <template #header>
                                         <el-button type="primary" plain @click="addDialog = true">新增</el-button>
                                     </template>
                                     <template #default="scope">
+                                        <el-popover :width="160" trigger="hover">
+                                            <el-row :gutter="5">
+                                                <el-col :span="12">
+                                                    <el-button type="success"
+                                                        :disabled="scope.row.status == 1 || scope.row.id == 1"
+                                                        @click="updateStatus(1, scope.row.id)">通过</el-button>
+                                                </el-col>
+                                                <el-col :span="12">
+                                                    <el-button type="danger"
+                                                        :disabled="scope.row.status == 2 || scope.row.id == 1"
+                                                        @click="updateStatus(2, scope.row.id)">拒绝</el-button>
+                                                </el-col>
+                                            </el-row>
+                                            <template #reference>
+                                                <el-button type="primary">审核</el-button>
+                                            </template>
+                                        </el-popover>
+
                                         <el-button type="primary" :icon="Edit" circle @click="edit(scope.row)" />
                                         <el-button type="danger" :icon="Delete" circle
                                             @click="handleDelete(scope.row.id)" />
@@ -70,15 +104,44 @@
                                 <el-form-item label="企业名">
                                     <el-input v-model="form.companyName" />
                                 </el-form-item>
+
+                                <el-form-item label="代表人姓名">
+                                    <el-input v-model="form.userName" />
+                                </el-form-item>
+                                <el-form-item label="电话">
+                                    <el-input v-model="form.phone" />
+                                </el-form-item>
+                                <el-form-item label="地址">
+                                    <el-cascader :options="areajson" ref="address" @change="handleChange()"
+                                        style="width: 100%;">
+                                        <template #default="{ node, data }">
+                                            <span>{{ data.label }}</span>
+                                            <span v-if="!node.isLeaf"> ({{ data.children.length }}) </span>
+                                        </template>
+                                    </el-cascader>
+                                </el-form-item>
+                                <el-form-item label="业务类型">
+                                    <el-select v-model="form.businessType" style="width: 100%;" placeholder="Select">
+                                        <el-option v-for="businessType in businessTypes" :key="businessType.value"
+                                            :label="businessType.label" :value="businessType.value" />
+                                    </el-select>
+                                </el-form-item>
+                                <el-form-item label="电商平台">
+                                    <el-select v-model="form.platform" style="width: 100%;" placeholder="Select">
+                                        <el-option v-for="commerce1 in commerce" :key="commerce1.value"
+                                            :label="commerce1.label" :value="commerce1.value" />
+                                    </el-select>
+                                </el-form-item>
                                 <el-form-item label="会员等级">
-                                    <el-select v-model="form.vipSelect" class="m-2" placeholder="Select">
+                                    <el-select v-model="form.vipSelect" style="width: 100%;" placeholder="Select">
                                         <el-option v-for="vip in vipList" :key="vip.id" :label="vip.name" :value="vip.id" />
                                     </el-select>
                                 </el-form-item>
                                 <el-form-item label="会员过期时间">
                                     <el-date-picker v-model="form.expiresDate" type="datetime"
-                                        value-format="YYYY-MM-DD HH:mm:ss" />
+                                        value-format="YYYY-MM-DD HH:mm:ss" style="width: 100%;" />
                                 </el-form-item>
+
                             </el-form>
                             <template #footer>
                                 <span class="dialog-footer">
@@ -173,19 +236,49 @@
         <el-dialog v-model="addDialog" title="新增" width="30%">
             <el-form label-position="right" label-width="100px" :model="form" style="max-width: 460px">
                 <el-form-item label="企业号">
-                    <el-input v-model="form.companyId" />
+                    <el-input v-model="form.companyId" placeholder="请输入企业号" />
                 </el-form-item>
                 <el-form-item label="企业名">
-                    <el-input v-model="form.companyName" />
+                    <el-input v-model="form.companyName" placeholder="请输入企业名" />
+                </el-form-item>
+                <el-form-item label="代表人姓名">
+                    <el-input v-model="form.userName" placeholder="请输入企业代表姓名" />
+                </el-form-item>
+                <el-form-item label="电话">
+                    <el-input v-model="form.phone" placeholder="请输入企业代表电话" />
+                </el-form-item>
+                <el-form-item label="地址">
+                    <el-cascader :options="areajson" ref="address" @change="handleChange()" style="width: 100%;"
+                        placeholder="请选择企业地址">
+                        <template #default="{ node, data }">
+                            <span>{{ data.label }}</span>
+                            <span v-if="!node.isLeaf"> ({{ data.children.length }}) </span>
+                        </template>
+                    </el-cascader>
+                </el-form-item>
+
+                <el-form-item label="业务类型">
+                    <el-select v-model="form.businessType" style="width: 100%;" placeholder="选择业务类型">
+                        <el-option v-for="businessType in businessTypes" :key="businessType.value"
+                            :label="businessType.label" :value="businessType.value" />
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="电商平台">
+                    <el-select v-model="form.platform" style="width: 100%;" placeholder="选择电商平台">
+                        <el-option v-for="commerce1 in commerce" :key="commerce1.value" :label="commerce1.label"
+                            :value="commerce1.value" />
+                    </el-select>
                 </el-form-item>
                 <el-form-item label="会员等级">
-                    <el-select v-model="form.vipSelect" class="m-2" placeholder="Select">
+                    <el-select v-model="form.vipSelect" style="width: 100%;" placeholder="选择会员等级">
                         <el-option v-for="vip in vipList" :key="vip.id" :label="vip.name" :value="vip.id" />
                     </el-select>
                 </el-form-item>
                 <el-form-item label="会员过期时间">
-                    <el-date-picker v-model="form.expiresDate" type="datetime" value-format="YYYY-MM-DD HH:mm:ss" />
+                    <el-date-picker v-model="form.expiresDate" type="datetime" value-format="YYYY-MM-DD HH:mm:ss"
+                        style="width: 100%;" placeholder="请选择会员过期时间" />
                 </el-form-item>
+
             </el-form>
             <template #footer>
                 <span class="dialog-footer">
@@ -199,19 +292,19 @@
         <el-dialog v-model="addVipDialog" title="新增(-1为无限次)" width="30%">
             <el-form label-position="right" label-width="100px" :model="form" style="max-width: 460px">
                 <el-form-item label="会员制名称">
-                    <el-input v-model="form.name" />
+                    <el-input v-model="form.name" placeholder="请输入会员制名称" />
                 </el-form-item>
                 <el-form-item label="授权工位数量">
-                    <el-input type="number" v-model="form.stationNum" />
+                    <el-input type="number" v-model="form.stationNum" placeholder="请输入授权工位数量" />
                 </el-form-item>
                 <el-form-item label="普通渲染数量">
-                    <el-input type="number" v-model="form.renderNum" />
+                    <el-input type="number" v-model="form.renderNum" placeholder="请输入普通渲染数量" />
                 </el-form-item>
                 <el-form-item label="查询次数">
-                    <el-input type="number" v-model="form.findNum" />
+                    <el-input type="number" v-model="form.findNum" placeholder="请输入查询次数" />
                 </el-form-item>
                 <el-form-item label="水印渲染数量">
-                    <el-input type="number" v-model="form.watermarkRenderNum" />
+                    <el-input type="number" v-model="form.watermarkRenderNum" placeholder="请输入水印渲染数量" />
                 </el-form-item>
             </el-form>
             <template #footer>
@@ -234,6 +327,10 @@
                 </span>
             </template>
         </el-dialog>
+        <el-dialog v-model="messageDialog" title="生成用户" width="30%">
+            <span>用户名:{{ newUser.id }}</span>
+            <span>密码: admin</span>
+        </el-dialog>
     </div>
 </template>
 <script>
@@ -242,6 +339,8 @@ import { message } from '@/utils/messageBox';
 import { reactive, ref } from 'vue';
 import { Delete, Edit, Search } from '@element-plus/icons-vue'
 import { useStore } from 'vuex';
+import { businessTypes, commerce } from '@/global'
+import { areajson } from '@/areaGlobal'
 
 export default {
     setup() {
@@ -260,8 +359,15 @@ export default {
             findNum: '',
             watermarkRenderNum: '',
             expiresDate: '',
+            address: '',
+            phone: '',
+            userName: '',
+            businessType: '',
+            platform: '',
         })
 
+        let newUser = ref('');
+        let messageDialog = ref(false);
         let editVipDialog = ref(false);
         let timestamp = ref();
         let time = ref('');
@@ -279,15 +385,16 @@ export default {
         let pageSizeVip = ref(10);
         let companyId = ref("");
         let companyName = ref("");
-        let startDate = ref("");
         let searchDialog = ref(false);
         let searchId = ref("");
         let editDialog = ref(false);
         let vipList = ref([])
-        let vipLevel = ref('');
         let addVipDialog = ref(false);
         const activeName = ref('first');
         let expireTime = ref('');
+        let userName = ref('');
+        let businessType = ref('');
+        let platform = ref('');
 
         const timestampToTime = (timestamp) => {
             var date = new Date(timestamp);
@@ -325,8 +432,9 @@ export default {
                 desc: desc.value,
                 companyName: companyName.value,
                 companyId: companyId.value,
-                startDate: startDate.value,
-                vipName: vipLevel.value,
+                userName: userName.value,
+                businessType: businessType.value,
+                platform: platform.value,
             },
                 function success(resp) {
                     if (resp.code == '200') {
@@ -396,20 +504,21 @@ export default {
         getExpire();
 
         return {
+            messageDialog,
             lisenceList,
+            businessType,
             addDialog,
             editVipDialog,
-            vipLevel,
             getMachine,
             companyId,
             companyName,
             addVipDialog,
+            userName,
             totalVip,
             form,
             code,
             time,
             searchDialog,
-            startDate,
             editDialog,
             expireTime,
             timer,
@@ -418,8 +527,10 @@ export default {
             current_pageVip,
             pageSizeVip,
             store,
+            businessTypes,
             vipList,
             total,
+            platform,
             pageSize,
             current_page,
             select,
@@ -429,7 +540,10 @@ export default {
             Delete,
             Edit,
             Search,
-            activeName
+            activeName,
+            areajson,
+            commerce,
+            newUser,
         }
     },
     methods: {
@@ -466,12 +580,19 @@ export default {
                 companyName: that.form.companyName,
                 vipSelect: that.form.vipSelect,
                 expiresDate: that.form.expiresDate,
+                userName: that.form.userName,
+                phone: that.form.phone,
+                address: that.form.address,
+                type: that.form.businessType,
+                platform: that.form.platform,
             }, function success(resp) {
                 if (resp.code == '200') {
                     message(resp.msg, 'success');
                     that.addDialog = false;
                     that.handleEditClose();
                     that.select();
+                    that.newUser = resp.data
+                    that.messageDialog = true;
                 } else {
                     message(resp.msg, 'warning');
                 }
@@ -502,7 +623,7 @@ export default {
         },
         handleDelete(id) {
             const that = this;
-            postRequest("/license/delete", {
+            postRequest("/company/delete", {
                 id: id,
             }, function success(resp) {
                 if (resp.code == '200') {
@@ -541,6 +662,11 @@ export default {
             that.form.companyName = company.companyName;
             that.form.vipSelect = company.vip.id;
             that.form.expiresDate = company.expiresDate;
+            that.form.businessType = company.type;
+            that.form.platform = company.platform;
+            that.form.address = company.address;
+            that.form.userName = company.userName;
+            that.form.phone = company.phone;
             that.editDialog = true;
         },
         editVip(vip) {
@@ -569,10 +695,16 @@ export default {
                 companyName: that.form.companyName,
                 vipSelect: that.form.vipSelect,
                 expiresDate: that.form.expiresDate,
+                userName: that.form.userName,
+                phone: that.form.phone,
+                address: that.form.address,
+                type: that.form.businessType,
+                platform: that.form.platform,
             }, function success(resp) {
                 if (resp.code == '200') {
                     message('修改成功', 'success');
                     that.editDialog = false;
+                    that.handleEditClose();
                     that.select();
                 } else {
                     message(resp.msg, 'warning');
@@ -612,6 +744,12 @@ export default {
             this.form.findNum = '';
             this.form.watermarkRenderNum = '';
             this.form.expiresDate = '';
+            this.form.businessType = '';
+            this.form.address = '';
+            this.form.phone = '';
+            this.form.platform = '';
+            this.form.userName = '';
+            this.form.vipSelect = '';
         },
         handleClick() {
             console.log(this.activeName);
@@ -641,6 +779,39 @@ export default {
                 }
             }, function error() {
                 message("删除失败", 'error');
+            })
+        },
+        handleChange() {
+            let areaTextArr = ""
+            let arr = this.$refs["address"].getCheckedNodes()[0].pathNodes;
+            arr.forEach((i) => {
+                areaTextArr += i.label;
+            });
+            this.form.address = areaTextArr;
+            // console.log(this.form.address);
+        },
+        statusFormatter(row, col, cellValue) {
+            if (cellValue == 0) {
+                return "未审核";
+            } else if (cellValue == 1) {
+                return "审核通过";
+            } else {
+                return "未通过审核"
+            }
+        },
+        updateStatus(status, id) {
+            // console.log(status);
+            const that = this;
+            postRequest("/company/updateStatus", {
+                status: status,
+                id: id,
+            }, function success(resp) {
+                if (resp.code == 200) {
+                    message(resp.msg, "success");
+                    that.select();
+                } else {
+                    message(resp.msg, "warning");
+                }
             })
         }
     },

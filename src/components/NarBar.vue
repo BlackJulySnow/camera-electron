@@ -3,7 +3,6 @@
         <div class="container">
             <router-link class="navbar-brand" :to="{ name: 'home' }">
                 <img src="@/assets/logo.png" alt="" width="28" height="28" class="d-inline-block align-text-top">
-                货查查视频追溯系统
             </router-link>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarText"
                 aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
@@ -47,7 +46,8 @@
                             aria-current="page" :to="{ name: 'admin_group_management' }">
                             组别管理</router-link>
                     </li>
-                    <li class="nav-item md-2" v-if="$store.state.user.role == 'ROLE_ADMIN'">
+                    <li class="nav-item md-2"
+                        v-if="$store.state.user.role == 'ROLE_ADMIN' && $store.state.user.company.id == 1">
                         <router-link
                             :class="route_name == 'admin_license_management' ? 'nav-link active mleft' : 'mleft nav-link'"
                             aria-current="page" :to="{ name: 'admin_license_management' }">
@@ -73,6 +73,11 @@
                     <li class="nav-item" style="margin:auto 10px;">
                         <router-link class="btn btn-primary" :to="{ name: 'user_login' }" role="button">
                             登录
+                        </router-link>
+                    </li>
+                    <li class="nav-item" style="margin:auto 10px;">
+                        <router-link class="btn btn-secondary" :to="{ name: 'user_register' }" role="button">
+                            注册
                         </router-link>
                     </li>
                 </ul>

@@ -8,26 +8,26 @@
                         <el-dialog v-model="addDialog" title="新增" width="30%">
                             <el-form label-position="right" label-width="100px" :model="form" style="max-width: 460px">
                                 <el-form-item label="账号">
-                                    <el-input v-model="form.id" />
+                                    <el-input v-model="form.id" placeholder="请输入账号" />
                                 </el-form-item>
                                 <el-form-item label="姓名">
-                                    <el-input v-model="form.name" />
+                                    <el-input v-model="form.name" placeholder="请输入姓名" />
                                 </el-form-item>
                                 <el-form-item label="密码">
-                                    <el-input v-model="form.password" type="password" show-password />
+                                    <el-input v-model="form.password" type="password" show-password placeholder="请输入密码" />
                                 </el-form-item>
                                 <el-form-item label="是否启用">
                                     <el-switch class="ml-2" v-model="form.enable"
                                         style="--el-switch-on-color: #13ce66; --el-switch-off-color: #ff4949" />
                                 </el-form-item>
                                 <el-form-item label="权限">
-                                    <el-select v-model="form.role" class="m-2" placeholder="Select">
+                                    <el-select v-model="form.role" placeholder="选择用户权限" style="width:100%">
                                         <el-option v-for="role in userRole" :key="role.value" :label="role.label"
                                             :value="role.value" />
                                     </el-select>
                                 </el-form-item>
                                 <el-form-item label="组别">
-                                    <el-select v-model="form.group" class="m-2" placeholder="Select">
+                                    <el-select v-model="form.group" placeholder="选择用户组别" style="width:100%">
                                         <el-option v-for="group in groupList" :key="group.id" :label="group.name"
                                             :value="group.id" />
                                     </el-select>
@@ -61,6 +61,8 @@
                         </el-table-column>
                         <el-table-column prop="role" label="权限" :formatter="roleFormatter" />
                         <el-table-column prop="group.name" label="组别" />
+                        <el-table-column prop="company.companyName" label="公司名称" v-if="$store.state.user.company.id == 1" />
+
                         <el-table-column width="200">
                             <template #header>
                                 <el-input v-model="key" placeholder="姓名关键字" />
@@ -89,13 +91,13 @@
                                 style="--el-switch-on-color: #13ce66; --el-switch-off-color: #ff4949" />
                         </el-form-item>
                         <el-form-item label="权限">
-                            <el-select v-model="form.role" class="m-2" placeholder="Select">
+                            <el-select v-model="form.role" placeholder="选择用户权限" style="width:100%">
                                 <el-option v-for="role in userRole" :key="role.value" :label="role.label"
                                     :value="role.value" />
                             </el-select>
                         </el-form-item>
                         <el-form-item label="组别">
-                            <el-select v-model="form.group" class="m-2" placeholder="Select">
+                            <el-select v-model="form.group" placeholder="选择用户组别" style="width:100%">
                                 <el-option v-for="group in groupList" :key="group.id" :label="group.name"
                                     :value="group.id" />
                             </el-select>
