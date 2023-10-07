@@ -576,6 +576,7 @@ export default {
         addLicense() {
             const that = this;
             postRequest("/company/add", {
+                companyId: that.form.companyId,
                 companyName: that.form.companyName,
                 vipSelect: that.form.vipSelect,
                 expiresDate: that.form.expiresDate,
@@ -657,6 +658,7 @@ export default {
         edit(company) {
             const that = this;
             that.form.id = company.id;
+            that.form.companyId = company.companyId;
             that.form.companyName = company.companyName;
             that.form.vipSelect = company.vip.id;
             that.form.expiresDate = company.expiresDate;
@@ -665,7 +667,6 @@ export default {
             that.form.address = company.address;
             that.form.userName = company.userName;
             that.form.phone = company.phone;
-            that.form.companyId = company.companyId;
             that.editDialog = true;
         },
         editVip(vip) {
@@ -735,6 +736,7 @@ export default {
         handleEditClose() {
             this.form.id = "";
             this.form.companyName = "";
+            this.form.companyId = "";
             this.form.name = "";
             this.form.stationNum = '';
             this.form.renderNum = '';
