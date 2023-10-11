@@ -63,7 +63,7 @@
                                     v-else-if="scope.row.state != 4">删除</el-button>
                                 <el-button type="danger" @click="handleDelete(scope.row.id)"
                                     v-else-if="scope.row.state == 4">彻底删除</el-button>
-                                <el-button type="success" :disabled="scope.row.state != 2" :icon="Download" circle
+                                <el-button type="success" :disabled="scope.row.state != 2 || disabledDownLoad" :icon="Download" circle
                                     @click="downloadVideo(scope.row.id, scope.row.startTime, scope.row.goods.goodsId)"></el-button>
 
                                 <!-- <el-button type="success" :disabled="scope.row.state != 2" :icon="Download" circle
@@ -111,6 +111,7 @@ import { ref } from 'vue';
 import { Search, VideoPlay, Download } from '@element-plus/icons-vue'
 import { stateType } from '@/global'
 import router from '@/router/index'
+import {ipcRenderer} from 'electron'
 
 export default {
     setup() {
@@ -129,6 +130,7 @@ export default {
         let id = ref("");
         let searchId = ref("");
         let filePath = ref("");
+        let disabledDownLoad = ref(false);
 
         const select = () => {
             flaskRequest("/videoSelect", {
@@ -191,6 +193,7 @@ export default {
             Download,
             stationName,
             searchDialog,
+            disabledDownLoad,
             id,
             searchId,
         }
@@ -208,35 +211,6 @@ export default {
             this.searchDialog = false;
             this.id = this.searchId.replace(/\n/g, ",");
         },
-        // timeFormatter(row, column, cellValue) {
-        //     if (cellValue == null) {
-        //         return '\\';
-        //     } else {
-        //         let format = 'YYYY-mm-dd HH:MM:SS'
-        //         let date = new Date(cellValue);
-        //         const dataItem = {
-        //             'Y+': date.getFullYear().toString(),
-        //             'm+': (date.getMonth() + 1).toString(),
-        //             'd+': date.getDate().toString(),
-        //             'H+': date.getHours().toString(),
-        //             'M+': date.getMinutes().toString(),
-        //             'S+': date.getSeconds().toString(),
-        //         };
-        //         Object.keys(dataItem).forEach((item) => {
-        //             const ret = new RegExp(`(${item})`).exec(format);
-        //             if (ret) {
-        //                 format = format.replace(ret[1], ret[1].length === 1 ? dataItem[item] : dataItem[item].padStart(ret[1].length, '0'));
-        //             }
-        //         });
-        //         return format
-        //     }
-        // },
-        // videoTimeFormatter(row, column) {
-        //     console.log(column);
-        //     let start = Date.parse(row.startTime);
-        //     let end = Date.parse(row.endTime);
-        //     return (end - start) / 1000;
-        // },
         stateFormatter(row, column, cellValue) {
             for (let i = 0; i < stateType.length; i++) {
                 if (cellValue == stateType[i].value) {
@@ -294,21 +268,29 @@ export default {
             })
         },
         downloadVideo(id, startTime, goodsId) {
-            flaskRequest("/fileLoad", {
-                id: id,
-                startTime: startTime,
-                goodsId: goodsId
-            },
-                function success(resp) {
-                    if (resp.code == 200) {
-                        message(resp.msg, "success");
-                    } else {
-                        message(resp.msg, "warning");
-                    }
-                }, function error(resp) {
-                    message(resp.responseJSON.msg, "error");
-                })
-
+            const that = this;
+            that.disabledDownLoad = true; 
+            const result = ipcRenderer.invoke('dialog:openFile');
+            result.then(res=>{
+                if (res != undefined){
+                    flaskRequest("/fileLoad", {
+                        id: id,
+                        startTime: startTime,
+                        goodsId: goodsId,
+                        path: res,
+                    }, function success(resp) {
+                        if (resp.code == 200) {
+                            message(resp.msg, "success");
+                        } else {
+                            message(resp.msg, "warning");
+                        }
+                        that.disabledDownLoad = false; 
+                    }, function error(resp) {
+                        message(resp.responseJSON.msg, "error");
+                        that.disabledDownLoad = false; 
+                    })
+                }
+            })
         }
     }
 }

@@ -1,8 +1,9 @@
 'use strict'
 
-import { app, protocol, BrowserWindow, screen } from 'electron'
+import { app, protocol, BrowserWindow, screen, dialog, ipcMain, ipcRenderer } from 'electron'
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib'
 import installExtension, { VUEJS3_DEVTOOLS } from 'electron-devtools-installer'
+
 // import { postRequest } from './utils/http'
 // import path from "path";
 const isDevelopment = process.env.NODE_ENV !== 'production'
@@ -65,16 +66,32 @@ app.on('activate', () => {
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.on('ready', async() => {
-    if (isDevelopment && !process.env.IS_TEST) {
-        // Install Vue Devtools
-        try {
-            await installExtension(VUEJS3_DEVTOOLS)
-        } catch (e) {
-            console.error('Vue Devtools failed to install:', e.toString())
+        if (isDevelopment && !process.env.IS_TEST) {
+            // Install Vue Devtools
+            try {
+                await installExtension(VUEJS3_DEVTOOLS)
+            } catch (e) {
+                console.error('Vue Devtools failed to install:', e.toString())
+            }
         }
+        createWindow();
+        ipcMain.handle("dialog:openFile", handleFileOpen)
+    })
+    // 新增：处理打开文件对话框的函数
+async function handleFileOpen() {
+    const options = {
+        title: 'Select a Folder',
+        properties: ['openDirectory']
+    };
+    const { canceled, filePaths } = await dialog.showOpenDialog(options)
+    if (canceled) {
+        console.log(1)
+        return
+    } else {
+        console.log(2, filePaths)
+        return filePaths[0]
     }
-    createWindow()
-})
+}
 
 
 // Exit cleanly on request from parent process in development mode.

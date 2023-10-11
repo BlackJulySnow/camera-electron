@@ -24,8 +24,8 @@ module.exports = defineConfig({
 module.exports = {
     pluginOptions: {
         electronBuilder: {
-            contextIsolation: false,
             nodeIntegration: true,
+            contextIsolation: false,
             builderOptions: {
                 appId: "com.huochacha.video",
                 copyright: "huochacha",

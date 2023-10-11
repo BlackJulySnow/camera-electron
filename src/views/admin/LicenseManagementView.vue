@@ -693,6 +693,7 @@ export default {
                 id: that.form.id,
                 companyName: that.form.companyName,
                 vipSelect: that.form.vipSelect,
+                companyId: that.form.companyId,
                 expiresDate: that.form.expiresDate,
                 userName: that.form.userName,
                 phone: that.form.phone,
