@@ -60,6 +60,12 @@
                                 <el-table-column prop="platform" label="电商平台" />
                                 <el-table-column prop="address" label="地址" width="150" />
                                 <el-table-column prop="vip.name" label="会员等级" sortable="costom" width="110" />
+                                <el-table-column prop="cos" label="云存储">
+                                    <template #default="scope">
+                                        <el-switch class="ml-2" v-model="scope.row.cos"
+                                            style="--el-switch-on-color: #13ce66; --el-switch-off-color: #ff4949" @click="switchChange(scope.row)"/>
+                                    </template>
+                                </el-table-column>
                                 <el-table-column prop="expiresDate" label="过期时间" sortable="costom" width="180" />
                                 <el-table-column prop="status" label="审核状态" sortable="costom" width="120"
                                     :formatter="statusFormatter" />
@@ -440,6 +446,7 @@ export default {
                     if (resp.code == '200') {
                         total.value = resp.data.totalElements;
                         lisenceList.value = resp.data.content;
+                        console.log(lisenceList.value);
                     } else {
                         message(resp.msg, 'error');
                     }
@@ -828,6 +835,20 @@ export default {
                     message("获取失败", "warning");
 
                 })
+        },
+        switchChange(company){
+            const that = this;
+            postRequest("/company/updateCos",{
+                id: company.id,
+                state: company.cos,
+            }, function success(resp){
+                if (resp.code == 200){
+                    that.select();
+                    message(resp.msg, 'success');
+                }else{
+                    message(resp.msg, 'warning');
+                }
+            })
         }
     },
     created() {

@@ -46,13 +46,13 @@
                 </div>
                 <div class="card-body">
                     <el-table :data="cameraList" style="width: 100%" height="540" @sort-change="sortChange">
-                        <el-table-column label="序号">
-                            <template #default="scope">
+                        <el-table-column label="序号" width="60">
+                            <template #default="scope" >
                                 {{ (current_page - 1) * pageSize + scope.$index + 1 }}
                             </template>
                         </el-table-column>
-                        <el-table-column prop="ip" label="ip" sortable="costom" width="100" />
-                        <el-table-column prop="port" label="端口" sortable="costom" />
+                        <el-table-column prop="ip" label="IP" sortable="costom" />
+                        <el-table-column prop="port" label="端口" sortable="costom" width="100"/>
                         <el-table-column prop="type" label="类型" :formatter="Formatter" />
                         <el-table-column prop="company.companyName" label="公司名称" v-if="$store.state.user.company.id == 1" />
                         <el-table-column prop="username" label="用户名" />

@@ -58,13 +58,13 @@
                 </div>
                 <div class="card-body">
                     <el-table :data="stationList" style="width: 100%" height="540" @sort-change="sortChange">
-                        <el-table-column label="序号">
-                            <template #default="scope">
+                        <el-table-column label="序号" width="60">
+                            <template #default="scope" >
                                 {{ (current_page - 1) * pageSize + scope.$index + 1 }}
                             </template>
                         </el-table-column>
-                        <el-table-column prop="stationName" label="工位名称" sortable="costom" width="120" />
-                        <el-table-column prop="stationIp" label="工位IP" sortable="costom" width="100" />
+                        <el-table-column prop="stationName" label="工位名称" sortable="costom" width="150" />
+                        <el-table-column prop="stationIp" label="工位IP" sortable="costom" />
                         <el-table-column prop="stationType" label="工位扫描类型" sortable="costom" width="140" />
                         <el-table-column prop="company.companyName" label="公司名称" v-if="$store.state.user.company.id == 1" />
                         <el-table-column prop="lastUploadTime" label="在线情况" sortable="costom" width="110">

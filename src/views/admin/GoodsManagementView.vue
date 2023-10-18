@@ -40,14 +40,14 @@
                     <el-table style="width: 100%" height="540" :data="goodsList" @sort-change="sortChange" ref="multiple"
                         @selection-change="handleSelectionChange">
                         <el-table-column type="selection" width="55" :selectable="selectable" />
-                        <el-table-column label="序号">
+                        <el-table-column label="序号" width="60">
                             <template #default="scope">
                                 {{ (current_page - 1) * pageSize + scope.$index + 1 }}
                             </template>
                         </el-table-column>
-                        <el-table-column prop="goodsId" label="订单编号" sortable="costom" width="150" />
+                        <el-table-column prop="goodsId" label="订单编号" sortable="costom"  />
                         <el-table-column prop="scanTime" label="扫描时间" sortable="costom" width="180" />
-                        <el-table-column prop="station['stationName']" label="工位名称" />
+                        <el-table-column prop="station['stationName']" label="工位名称" width="180"/>
                         <el-table-column prop="company.companyName" label="公司名称" v-if="$store.state.user.company.id == 1"
                             width="100" />
                         <el-table-column align="right" width="220" fixed="right">
@@ -126,6 +126,7 @@
 import { postRequest, flaskRequest } from '@/utils/http';
 import { message } from '@/utils/messageBox';
 import { ref } from 'vue';
+import { stateType } from '@/global'
 import { Search, MoreFilled, VideoPlay, Refresh, Download } from '@element-plus/icons-vue'
 import router from '@/router/index'
 
@@ -316,23 +317,30 @@ export default {
             this.deleteGoods(multipleArray.join());
         },
         getVideoList(id, list, index) {
+            const that = this;
             this.goodsIndex = index;
             this.videoListDialog = true;
             this.videoId = id;
-            this.videoList = list;
+            // this.videoList = list;
+            flaskRequest("/selectByGoodsId", {
+                id: id,
+            }, function success(resp) {
+                if (resp.code == '200') {
+                    that.videoList = resp.data;
+                } else {
+                    message(resp.msg, 'error');
+                }
+            }, function error(resp) {
+                message(resp.responseJSON.msg, 'error');
+            })
         },
         stateFormatter(row, column, cellValue) {
-            if (cellValue == 0) {
-                return "导出中";
-            } else if (cellValue == 1) {
-                return "导出中";
-            } else if (cellValue == 2) {
-                return "导出完成";
-            } else if (cellValue == 3) {
-                return "导出错误";
-            } else if (cellValue == 4) {
-                return "导出结果已被删除";
+            for (let i = 0; i < stateType.length; i++) {
+                if (cellValue == stateType[i].value) {
+                    return stateType[i].label;
+                }
             }
+            return "错误";
         },
         play(row) {
             // router.push({ name: 'video_view', params: { id: id } });
@@ -343,7 +351,7 @@ export default {
         },
         Fresh(id) {
             const that = this;
-            postRequest("/video/selectByGoodsId", {
+            flaskRequest("/selectByGoodsId", {
                 id: id,
             }, function success(resp) {
                 if (resp.code == '200') {
@@ -354,8 +362,6 @@ export default {
                 }
             }, function error(resp) {
                 message(resp.responseJSON.msg, 'error');
-
-                // message(resp.msg, 'error');
             })
         },
         selectable(row) {

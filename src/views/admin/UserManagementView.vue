@@ -46,7 +46,7 @@
                 </div>
                 <div class="card-body">
                     <el-table :data="userList" style="width: 100%" height="540" @sort-change="sortChange">
-                        <el-table-column label="序号">
+                        <el-table-column label="序号" width="60">
                             <template #default="scope">
                                 {{ (current_page - 1) * pageSize + scope.$index + 1 }}
                             </template>

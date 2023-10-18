@@ -54,7 +54,7 @@
                         <el-table-column prop="goods.goodsId" label="单号" />
                         <el-table-column prop="goods.station.stationName" label="扫描工位" />
                         <el-table-column prop="state" label="视频状态" :formatter="stateFormatter" sortable="costom"
-                            width="110" />
+                            width="130" />
                         <el-table-column align="right" width="200">
                             <template #default="scope">
                                 <el-button type="primary" @click="randerAgain(scope.row)"
@@ -257,11 +257,11 @@ export default {
         },
         randerAgain(video) {
             // const that = this;
-            flaskRequest("/renderByVideoId", {
-                "videos[]": video.id,
+            flaskRequest("/renderAgain", {
+                "video": video.id,
+                startTime: video.startTime,
             }, function success(resp) {
                 message(resp.msg, "success");
-                // that.select();
                 video.state = 1;
             }, function error() {
                 message("导出错误", "error");
