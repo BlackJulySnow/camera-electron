@@ -37,7 +37,6 @@ async function createWindow() {
         await win.loadURL(process.env.WEBPACK_DEV_SERVER_URL)
         if (!process.env.IS_TEST) win.webContents.openDevTools()
     } else {
-        win.webContents.openDevTools()
         createProtocol('app')
             // Load the index.html when not in development
         win.loadURL('app://./index.html')
@@ -51,7 +50,7 @@ async function createWindow() {
             error: { status: -1, msg: "检测更新异常" },
             checking: { status: 0, msg: "正在检查应用程序更新" },
             updateAva: { status: 1, msg: "检测到新版本，正在下载请稍后" },
-            updateNotAva: { status: -1, msg: "您现在使用的版本为最新版本,无需更新!" }
+            updateNotAva: { status: 2, msg: "您现在使用的版本为最新版本,无需更新!" }
         };
 
         //vue.config.json配置的一样
@@ -120,6 +119,8 @@ app.on('window-all-closed', () => {
     }
 })
 
+app.allowRendererProcessReuse = true
+
 app.on('activate', () => {
     // On macOS it's common to re-create a window in the app when the
     // dock icon is clicked and there are no other windows open.
@@ -140,6 +141,7 @@ app.on('ready', async() => {
         }
         createWindow();
         ipcMain.handle("dialog:openFile", handleFileOpen)
+
     })
     // 新增：处理打开文件对话框的函数
 async function handleFileOpen() {
@@ -150,7 +152,7 @@ async function handleFileOpen() {
     const { canceled, filePaths } = await dialog.showOpenDialog(options)
     if (canceled) {
         console.log(1)
-        return
+        return "canceled"
     } else {
         console.log(2, filePaths)
         return filePaths[0]

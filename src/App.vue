@@ -9,7 +9,6 @@ import "bootstrap/dist/js/bootstrap"
 import NavBar from '@/components/NarBar.vue'
 import { ipcRenderer } from 'electron'
 import { message } from '@/utils/messageBox'
-// import { useRoute } from "vue-router"
 
 export default {
 

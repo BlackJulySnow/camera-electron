@@ -11,8 +11,8 @@
                         <h1>暂不支持video标签</h1>
                     </videoPlay>
                 </div>
-                <!-- <el-slider range :max="100" @input="changeProcess" />
-                <el-button type="success" @click="submit">确认导出</el-button> -->
+                <el-slider range :max="100" @input="changeProcess" />
+                <el-button type="success" @click="submit">确认导出</el-button>
             </div>
         </div>
     </div>
@@ -23,9 +23,8 @@ import { reactive, ref } from "vue";
 import { useRoute } from "vue-router";
 import 'vue3-video-play/dist/style.css'
 import { videoPlay } from 'vue3-video-play'
-import { flask, pureRequest } from '@/utils/http'
+import { flask, videoRequest, flaskVideoRequest } from '@/utils/http'
 import { message } from '@/utils/messageBox';
-import router from '@/router/index'
 
 export default {
     components: {
@@ -87,6 +86,7 @@ export default {
             }
         },
         changeProcess(val) {
+            console.log(val);
             if (val[0] == this.value[0]) {
                 this.change(val[1]);
             } else {
@@ -96,21 +96,25 @@ export default {
         },
         submit() {
             const that = this;
-            pureRequest("/video/renderByVideoProcess", {
+            videoRequest("/video/renderByVideoProcess", {
                 id: that.route.params.id,
                 process1: that.value[0],
                 process2: that.value[1],
             }, function success(resp) {
                 if (resp.code == '200') {
                     message(resp.msg, 'success');
-                    router.push({ name: 'admin_video_management', params: {} });
+                    flaskVideoRequest("/renderByVideoId", {
+                        videos: [resp.data],
+                    }, function success(resp){
+                        console.log(resp);
+                    })
                 } else {
                     message(resp.msg, 'error');
                 }
             }, function error(resp) {
                 message(resp.msg, 'error');
             })
-        }
+        },
     }
 }
 </script>

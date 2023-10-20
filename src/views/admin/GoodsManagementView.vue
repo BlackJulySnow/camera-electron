@@ -101,11 +101,9 @@
                                 <el-button type="primary" circle :icon="Refresh" @click="Fresh(videoId)" />
                             </template>
                             <template #default="scope">
-                                <el-link target="_blank" :href="'/video/stream/' + scope.row.id"
-                                    :disabled="scope.row.state != 2" :underline="false" style="margin: 0 10px">
-                                    <el-button type="success" :disabled="scope.row.state != 2" :icon="Download" circle>
-                                    </el-button>
-                                </el-link>
+                                <el-button type="success" :disabled="scope.row.state != 2" :icon="Download" circle 
+                                @click="downloadVideo(scope.row.id, videoId, scope.row.startTime)">
+                                </el-button>
                                 <el-button type="success" circle :icon="VideoPlay" @click="play(scope.row)"
                                     :disabled="scope.row.state != 2" />
                             </template>
@@ -129,6 +127,7 @@ import { ref } from 'vue';
 import { stateType } from '@/global'
 import { Search, MoreFilled, VideoPlay, Refresh, Download } from '@element-plus/icons-vue'
 import router from '@/router/index'
+import { ipcRenderer } from 'electron'
 
 export default {
     setup() {
@@ -225,6 +224,7 @@ export default {
             VideoPlay,
             Refresh,
             Download,
+            ipcRenderer,
         }
     },
     methods: {
@@ -345,7 +345,8 @@ export default {
         play(row) {
             // router.push({ name: 'video_view', params: { id: id } });
             // console.log(row.id, row.startTime.split(" ")[0]);
-            let size = "height=" + window.screen.availHeight + ",width=" + window.screen.availWidth;
+            // let size = "height=" + window.screen.availHeight + ",width=" + window.screen.availWidth;
+            let size = "height=" + (window.screen.availHeight - 100) + ",width=" + (window.screen.availWidth - 100) + ",autoHideMenuBar=true";
             let routerUrl = router.resolve({ name: 'video_view', params: { time: row.startTime.split(" ")[0], id: row.id } });
             window.open(routerUrl.href, "_blank", size);
         },
@@ -370,6 +371,34 @@ export default {
             } else {
                 return false;
             }
+        },
+        downloadVideo(id, goodsId, startTime) {
+            console.log(id);
+            const that = this;
+            that.disabledDownLoad = true; 
+            const result = ipcRenderer.invoke('dialog:openFile');
+            result.then(res=>{
+                if (res != "canceled"){
+                    flaskRequest("/fileLoad", {
+                        id: id,
+                        startTime: startTime,
+                        goodsId: goodsId,
+                        path: res,
+                    }, function success(resp) {
+                        if (resp.code == 200) {
+                            message(resp.msg, "success");
+                        } else {
+                            message(resp.msg, "warning");
+                        }
+                        that.disabledDownLoad = false; 
+                    }, function error(resp) {
+                        message(resp.responseJSON.msg, "error");
+                        that.disabledDownLoad = false; 
+                    })
+                }else{
+                    that.disabledDownLoad = false; 
+                }
+            })
         }
     },
 }

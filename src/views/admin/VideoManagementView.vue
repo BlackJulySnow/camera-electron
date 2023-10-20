@@ -152,7 +152,6 @@ export default {
                 }
             }, function error(resp) {
                 message(resp.responseJSON.msg, 'error');
-                // message(resp.msg, 'error');
             })
         }
         const sortChange = (column) => {
@@ -246,7 +245,7 @@ export default {
         },
         play(row) {
             // let size = "height=" + window.screen.height + ",width=" + window.screen.width;
-            let size = "height=" + window.screen.availHeight + ",width=" + window.screen.availWidth;
+            let size = "height=" + (window.screen.availHeight - 100) + ",width=" + (window.screen.availWidth - 100) + ",autoHideMenuBar=true";
             let routerUrl = router.resolve({ name: 'video_view', params: { time: row.startTime.split(" ")[0], id: row.id } });
             window.open(routerUrl.href, "_blank", size);
         },
@@ -272,7 +271,7 @@ export default {
             that.disabledDownLoad = true; 
             const result = ipcRenderer.invoke('dialog:openFile');
             result.then(res=>{
-                if (res != undefined){
+                if (res != "canceled"){
                     flaskRequest("/fileLoad", {
                         id: id,
                         startTime: startTime,
@@ -289,6 +288,8 @@ export default {
                         message(resp.responseJSON.msg, "error");
                         that.disabledDownLoad = false; 
                     })
+                }else{
+                    that.disabledDownLoad = false; 
                 }
             })
         }

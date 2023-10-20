@@ -102,7 +102,6 @@ export default {
         const store = useStore();
         const route = useRoute();
 
-        console.log(store.state.user.is_login);
         let route_name = computed(() => route.name)
         const logout = () => {
             store.dispatch("logout");

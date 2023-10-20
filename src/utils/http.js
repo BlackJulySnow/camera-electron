@@ -91,3 +91,31 @@ export const imageRequest = (url, params, success) => {
         },
     });
 }
+
+export const videoRequest = (url, params, success) => {
+    return $.ajax({
+        url: base + url,
+        data: params,
+        headers: {
+            Authorization: "Bearer " + JSON.parse(localStorage.getItem("data")).jwtToken,
+        },
+        type: "post",
+        success,
+        error(resp) {
+            message(resp.responseJSON.msg, 'error');
+        }
+    })
+}
+
+export const flaskVideoRequest = (url, params, success, error) => {
+    return $.ajax({
+        url: flask + url,
+        data: params,
+        headers: {
+            Authorization: "Bearer " + JSON.parse(localStorage.getItem("data")).jwtToken,
+        },
+        type: "post",
+        success,
+        error,
+    })
+}
