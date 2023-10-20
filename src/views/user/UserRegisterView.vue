@@ -11,7 +11,12 @@
                     <el-input type="password" placeholder="密码" v-model="password" class="mt-2" show-password />
                     <el-input v-model="companyName" class="mt-2" placeholder="企业名" />
                     <el-input v-model="userName" class="mt-2" placeholder="企业代表姓名" />
-                    <el-input v-model="phone" class="mt-2" placeholder="企业代表电话" />
+                    <el-input v-model="phone" class="mt-2" placeholder="企业代表电话">
+                        <template #append>
+                            <el-button :icon="Message" @click="openVerifyDialog()" :disabled="getCodeBtnDisable">{{ btntxt }}</el-button>
+                        </template>
+                    </el-input>
+                    <el-input v-model="code" class="mt-2" placeholder="验证码" />
                     <el-cascader :options="areajson" ref="address" @change="handleChange()" class="mt-2" style="width: 100%"
                         placeholder="企业地址">
                         <template #default="{ node, data }">
@@ -27,7 +32,7 @@
                         <el-option v-for="commerce1 in commerce" :key="commerce1.value" :label="commerce1.label"
                             :value="commerce1.value" />
                     </el-select>
-                    <button class="mt-2">注册</button>
+                    <button class="mt-2 button">注册</button>
                 </form>
             </div>
             <div class="overlay-container">
@@ -41,6 +46,17 @@
                 <p>汕头市展华信息科技有限公司</p>
             </footer>
         </div>
+        <el-dialog v-model="verifyDialog" :width="width + 40" :show-close="false" align-center>
+            <slide-verify
+                :w="width"
+                ref="block"
+                class="silde_box"
+                slider-text="向右滑动->"
+                :accuracy="5" 
+                @success="onSuccess"
+                @fail="onFail"
+                @again="onAgain" />
+        </el-dialog>
     </div>
 </template>
 
@@ -52,12 +68,22 @@ import { message } from '@/utils/messageBox'
 import { businessTypes, commerce } from '@/global'
 import { areajson } from '@/areaGlobal'
 import { loginRequest } from '@/utils/http'
+import { Message } from '@element-plus/icons-vue'
+import SlideVerify from "vue3-slide-verify";
+import "vue3-slide-verify/dist/style.css";
 
 export default {
+    components:{
+        SlideVerify,
+    },
     setup() {
+        let width = document.documentElement.clientHeight * 0.3;
         const store = useStore();
+        const block = ref();
         let username = ref('');
+        let btntxt = ref('');
         let password = ref('');
+        let code = ref('');
         let userName = ref('');
         let businessType = ref('');
         let phone = ref('');
@@ -65,13 +91,15 @@ export default {
         let platform = ref('');
         let companyId = ref('');
         let companyName = ref('');
+        let waitTime = 60;
+        let getCodeBtnDisable = ref(false);
+        let verifyDialog = ref(false);
 
         const data = JSON.parse(localStorage.getItem("data"));
         if (data) {
             store.commit("updateToken", data.jwtToken);
             store.dispatch("getinfo", {
                 success() {
-                    // console.log(store.state.user.from_page);
                     store.commit("updatePullingInfo", false);
                     router.push(store.state.user.from_page);
                 },
@@ -104,6 +132,7 @@ export default {
                 address: area.value,
                 platform: platform.value,
                 companyName: companyName.value,
+                code: code.value,
             }, function success(resp) {
                 if (resp.code == 200) {
                     message(resp.msg, 'success');
@@ -118,19 +147,27 @@ export default {
         }
 
         return {
+            Message,
+            waitTime,
             username,
             password,
+            code,
+            btntxt,
             areajson,
+            width,
             businessTypes,
             commerce,
+            getCodeBtnDisable,
             userName,
             businessType,
             phone,
             area,
+            block,
             platform,
             companyId,
             companyName,
             register,
+            verifyDialog,
         }
     },
     methods: {
@@ -143,6 +180,40 @@ export default {
             this.area = areaTextArr;
             console.log(this.area);
         },
+        openVerifyDialog(){
+            this.verifyDialog = true;
+        },
+        onSuccess(){
+            const that = this;
+            this.verifyDialog = false;
+            that.block.refresh();
+            that.getCodeBtnDisable = true
+            that.btntxt = `(${that.waitTime})`
+            let timer = setInterval(function () {
+                if (that.waitTime > 1) {
+                    that.waitTime --
+                    that.btntxt = `(${that.waitTime})`
+                } else {
+                    clearInterval(timer)
+                    that.btntxt = ''
+                    that.getCodeBtnDisable = false
+                    that.waitTime = 60
+                }
+            }, 1000);
+            loginRequest("/company/sendSms", {
+                phone: that.phone
+            }, function success(resp){
+                message(resp.msg, "success");
+            }, function error(){
+                message("获取验证码失败", "error");
+            })
+        },
+        onFail(){
+            message("验证失败", 'warning')
+        },
+        onAgain(){
+            message('检测到非人为操作', 'error')
+        }
     }
 }
 </script>
@@ -193,7 +264,7 @@ a {
     margin: 15px 0;
 }
 
-button {
+.button {
     border-radius: 20px;
     border: 1px solid #FF4B2B;
     background-color: #FF4B2B;
@@ -206,11 +277,11 @@ button {
     transition: transform 80ms ease-in;
 }
 
-button:active {
+.button:active {
     transform: scale(0.95);
 }
 
-button:focus {
+.button:focus {
     outline: none;
 }
 

@@ -4,14 +4,12 @@ import { message } from '@/utils/messageBox';
 
 export var base;
 // base = "http:" + '//' + "127.0.0.1";
-base = "http:" + '//' + "106.55.62.69";
-// if (process.env.NODE_ENV === 'development') { //如果是开发环境
-//     // base = window.location.protocol + '//' + "127.0.0.1";
-//     base = "http:" + '//' + "127.0.0.1";
-// } else {
-//     // base = window.location.protocol + '//' + window.location.hostname + ":" + window.location.port
-//     base = "http:" + '//' + "127.0.0.1" + ":" + "80"
-// }
+// base = "http:" + '//' + "106.55.62.69";
+if (process.env.NODE_ENV === 'development') { //如果是开发环境
+    base = "http:" + '//' + "127.0.0.1";
+} else {
+    base = "http:" + '//' + "106.55.62.69";
+}
 export let flask = 'http://127.0.0.1:5000'
 export const postRequest = (url, params, success) => {
     return $.ajax({

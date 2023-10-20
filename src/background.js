@@ -3,6 +3,8 @@
 import { app, protocol, BrowserWindow, screen, dialog, ipcMain, ipcRenderer } from 'electron'
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib'
 import installExtension, { VUEJS3_DEVTOOLS } from 'electron-devtools-installer'
+import { autoUpdater } from "electron-updater";
+
 // import { postRequest } from './utils/http'
 // import path from "path";
 const isDevelopment = process.env.NODE_ENV !== 'production'
@@ -35,6 +37,7 @@ async function createWindow() {
         await win.loadURL(process.env.WEBPACK_DEV_SERVER_URL)
         if (!process.env.IS_TEST) win.webContents.openDevTools()
     } else {
+        win.webContents.openDevTools()
         createProtocol('app')
             // Load the index.html when not in development
         win.loadURL('app://./index.html')
@@ -42,6 +45,69 @@ async function createWindow() {
     win.webContents.on('did-finish-load', () => {
         exec("start " + process.cwd() + "/resources/dist/app/app.exe")
     })
+
+    function handleUpdate() {
+        const returnData = {
+            error: { status: -1, msg: "检测更新异常" },
+            checking: { status: 0, msg: "正在检查应用程序更新" },
+            updateAva: { status: 1, msg: "检测到新版本，正在下载请稍后" },
+            updateNotAva: { status: -1, msg: "您现在使用的版本为最新版本,无需更新!" }
+        };
+
+        //vue.config.json配置的一样
+        autoUpdater.setFeedURL(
+            "https://app-1253647758.cos.ap-guangzhou.myqcloud.com/"
+        ); //地址我就不写了，上面有说
+
+        //更新错误
+        autoUpdater.on("error", function(error) {
+            sendUpdateMessage(returnData.error);
+        });
+
+        //检查中
+        autoUpdater.on("checking-for-update", function() {
+            sendUpdateMessage(returnData.checking);
+        });
+
+        //发现新版本
+        //当发现一个可用更新的时候，更新包下载会自动开始
+        autoUpdater.on("update-available", function(info) {
+            sendUpdateMessage({ msg: "正在下载更新包" });
+        });
+        autoUpdater.on('update-downloaded', (event, releaseNotes, releaseName) => {
+            sendUpdateMessage({ msg: "下载完成" });
+            dialog.showMessageBox({
+                type: 'info',
+                title: '应用有新的版本',
+                message: `版本号：${event.version}，是否现在重启应用更新？`,
+                buttons: ['是', '否'],
+                defaultId: 0
+            }).then((buttonIndex) => {
+
+                if (buttonIndex.response == 0) {
+                    autoUpdater.quitAndInstall();
+                }
+            });
+        });
+
+        //当前版本为最新版本
+        autoUpdater.on("update-not-available", function(info) {
+            setTimeout(function() {
+                sendUpdateMessage(returnData.updateNotAva);
+            }, 1000);
+        });
+    }
+    // 通过main进程发送事件给renderer进程，提示更新信息
+    function sendUpdateMessage(text) {
+        if (win) {
+            win.webContents.send("message", text);
+        }
+    }
+    // 检查更新
+    ipcMain.on("checkForUpdate", (event, data) => {
+        autoUpdater.checkForUpdates();
+    });
+    handleUpdate()
 }
 
 // Quit when all windows are closed.
@@ -108,3 +174,5 @@ if (isDevelopment) {
         })
     }
 }
+
+//处理更新操作

@@ -30,6 +30,10 @@ module.exports = {
                 appId: "com.huochacha.video",
                 copyright: "huochacha",
                 productName: "货查查视频追溯系统",
+                publish: [{
+                    "provider": "generic",
+                    "url": "https://app-1253647758.cos.ap-guangzhou.myqcloud.com/"
+                }],
                 nsis: {
                     oneClick: false,
                     allowToChangeInstallationDirectory: true,

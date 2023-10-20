@@ -6,7 +6,6 @@ import ElementPlus from 'element-plus'
 import 'element-plus/dist/index.css'
 
 import locale from "element-plus/es/locale/lang/zh-cn";
-
 const debounce = (fn, delay) => {
     let timer = null;
     return function() {
@@ -27,4 +26,4 @@ window.ResizeObserver = class ResizeObserver extends _ResizeObserver {
     }
 }
 
-createApp(App).use(router).use(store).use(ElementPlus, {locale}).mount('#app')
+createApp(App).use(router).use(store).use(ElementPlus, { locale }).mount('#app')
