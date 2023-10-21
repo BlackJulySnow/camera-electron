@@ -70,7 +70,15 @@
                             <template #default="scope">
                                 <el-button type="primary" @click="ShowQrCode(scope.row.id)">二维码</el-button>
                                 <el-button type="primary" :icon="Edit" circle @click="edit(scope.row)" />
-                                <el-button type="danger" :icon="Delete" circle @click="handleDelete(scope.row.id)" />
+                                <el-popconfirm width="200" confirm-button-text="确认" cancel-button-text="取消"
+                                    confirm-button-type="danger" cancel-button-type="info" :hide-after="50" title="确认删除？"
+                                    @confirm="handleDelete(scope.row.id)">
+                                    <template #reference>
+                                        <el-button type="danger" :icon="Delete" circle
+                                            :disabled="scope.row.id == $store.state.user.id ? true : false" />
+                                    </template>
+                                </el-popconfirm>
+
                             </template>
                         </el-table-column>
                     </el-table>

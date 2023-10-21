@@ -105,7 +105,7 @@ export default {
                     message(resp.msg, 'success');
                     flaskVideoRequest("/renderByVideoId", {
                         videos: [resp.data],
-                    }, function success(resp){
+                    }, function success(resp) {
                         console.log(resp);
                     })
                 } else {

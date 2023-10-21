@@ -45,23 +45,33 @@
                                 {{ (current_page - 1) * pageSize + scope.$index + 1 }}
                             </template>
                         </el-table-column>
-                        <el-table-column prop="goodsId" label="订单编号" sortable="costom"  />
+                        <el-table-column prop="goodsId" label="订单编号" sortable="costom" />
                         <el-table-column prop="scanTime" label="扫描时间" sortable="costom" width="180" />
-                        <el-table-column prop="station['stationName']" label="工位名称" width="180"/>
+                        <el-table-column prop="station['stationName']" label="工位名称" width="180" />
                         <el-table-column prop="company.companyName" label="公司名称" v-if="$store.state.user.company.id == 1"
                             width="100" />
                         <el-table-column align="right" width="220" fixed="right">
                             <template #header>
-                                <el-button type="danger" round @click="deleteAll" :disabled="allDisable">
-                                    批量删除
-                                </el-button>
+                                <el-popconfirm width="200" confirm-button-text="确认" cancel-button-text="取消"
+                                    confirm-button-type="danger" cancel-button-type="info" :hide-after="50" title="确认删除？"
+                                    @confirm="deleteAll">
+                                    <template #reference>
+                                        <el-button type="danger" round :disabled="allDisable">批量删除</el-button>
+                                    </template>
+                                </el-popconfirm>
                                 <el-button type="primary" round @click="renderAll" :disabled="allDisable">
                                     批量导出
                                 </el-button>
                             </template>
                             <template #default="scope">
-                                <el-button type="danger" @click="deleteGoods(scope.row.id)" :disabled="btnDisabled">订单删除
-                                </el-button>
+                                <el-popconfirm width="200" confirm-button-text="确认" cancel-button-text="取消"
+                                    confirm-button-type="danger" cancel-button-type="info" :hide-after="50" title="确认删除？"
+                                    @confirm="deleteGoods(scope.row.id)">
+                                    <template #reference>
+                                        <el-button type="danger" :disabled="btnDisabled">订单删除
+                                        </el-button>
+                                    </template>
+                                </el-popconfirm>
                                 <el-button type="primary" @click="render(scope.row.id)" :disabled="btnDisabled"
                                     v-if="scope.row.videos.length == 0">开始导出</el-button>
                                 <el-button type="success"
@@ -101,8 +111,8 @@
                                 <el-button type="primary" circle :icon="Refresh" @click="Fresh(videoId)" />
                             </template>
                             <template #default="scope">
-                                <el-button type="success" :disabled="scope.row.state != 2" :icon="Download" circle 
-                                @click="downloadVideo(scope.row.id, videoId, scope.row.startTime)">
+                                <el-button type="success" :disabled="scope.row.state != 2" :icon="Download" circle
+                                    @click="downloadVideo(scope.row.id, videoId, scope.row.startTime)">
                                 </el-button>
                                 <el-button type="success" circle :icon="VideoPlay" @click="play(scope.row)"
                                     :disabled="scope.row.state != 2" />
@@ -375,10 +385,10 @@ export default {
         downloadVideo(id, goodsId, startTime) {
             console.log(id);
             const that = this;
-            that.disabledDownLoad = true; 
+            that.disabledDownLoad = true;
             const result = ipcRenderer.invoke('dialog:openFile');
-            result.then(res=>{
-                if (res != "canceled"){
+            result.then(res => {
+                if (res != "canceled") {
                     flaskRequest("/fileLoad", {
                         id: id,
                         startTime: startTime,
@@ -390,13 +400,13 @@ export default {
                         } else {
                             message(resp.msg, "warning");
                         }
-                        that.disabledDownLoad = false; 
+                        that.disabledDownLoad = false;
                     }, function error(resp) {
                         message(resp.responseJSON.msg, "error");
-                        that.disabledDownLoad = false; 
+                        that.disabledDownLoad = false;
                     })
-                }else{
-                    that.disabledDownLoad = false; 
+                } else {
+                    that.disabledDownLoad = false;
                 }
             })
         }

@@ -13,7 +13,8 @@
                     <el-input v-model="userName" class="mt-2" placeholder="企业代表姓名" />
                     <el-input v-model="phone" class="mt-2" placeholder="企业代表电话">
                         <template #append>
-                            <el-button :icon="Message" @click="openVerifyDialog()" :disabled="getCodeBtnDisable">{{ btntxt }}</el-button>
+                            <el-button :icon="Message" @click="openVerifyDialog()" :disabled="getCodeBtnDisable">{{ btntxt
+                            }}</el-button>
                         </template>
                     </el-input>
                     <el-input v-model="code" class="mt-2" placeholder="验证码" />
@@ -47,15 +48,8 @@
             </footer>
         </div>
         <el-dialog v-model="verifyDialog" :width="width + 40" :show-close="false" align-center>
-            <slide-verify
-                :w="width"
-                ref="block"
-                class="silde_box"
-                slider-text="向右滑动->"
-                :accuracy="5" 
-                @success="onSuccess"
-                @fail="onFail"
-                @again="onAgain" />
+            <slide-verify :w="width" ref="block" class="silde_box" slider-text="向右滑动->" :accuracy="5" @success="onSuccess"
+                @fail="onFail" @again="onAgain" />
         </el-dialog>
     </div>
 </template>
@@ -73,7 +67,7 @@ import SlideVerify from "vue3-slide-verify";
 import "vue3-slide-verify/dist/style.css";
 
 export default {
-    components:{
+    components: {
         SlideVerify,
     },
     setup() {
@@ -180,10 +174,10 @@ export default {
             this.area = areaTextArr;
             console.log(this.area);
         },
-        openVerifyDialog(){
+        openVerifyDialog() {
             this.verifyDialog = true;
         },
-        onSuccess(){
+        onSuccess() {
             const that = this;
             this.verifyDialog = false;
             that.block.refresh();
@@ -191,7 +185,7 @@ export default {
             that.btntxt = `(${that.waitTime})`
             let timer = setInterval(function () {
                 if (that.waitTime > 1) {
-                    that.waitTime --
+                    that.waitTime--
                     that.btntxt = `(${that.waitTime})`
                 } else {
                     clearInterval(timer)
@@ -202,16 +196,16 @@ export default {
             }, 1000);
             loginRequest("/company/sendSms", {
                 phone: that.phone
-            }, function success(resp){
+            }, function success(resp) {
                 message(resp.msg, "success");
-            }, function error(){
+            }, function error() {
                 message("获取验证码失败", "error");
             })
         },
-        onFail(){
+        onFail() {
             message("验证失败", 'warning')
         },
-        onAgain(){
+        onAgain() {
             message('检测到非人为操作', 'error')
         }
     }

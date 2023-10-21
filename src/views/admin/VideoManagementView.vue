@@ -1,5 +1,5 @@
 <template>
-    <div class="row" style="width:100%; margin-top:30px">
+    <div class="row" style="width: 100%; margin-top: 30px">
         <div class="col-2"></div>
         <div class="col-8">
             <div class="card">
@@ -8,7 +8,7 @@
                     <el-row :gutter="20">
                         <el-col :span="8">
                             <el-date-picker v-model="startTime" type="datetime" placeholder="开始时间"
-                                value-format="YYYY-MM-DD HH:mm:ss" style="width:100%" />
+                                value-format="YYYY-MM-DD HH:mm:ss" style="width: 100%" />
                         </el-col>
                         <el-col :span="8">
                             <el-input placeholder="搜索工位名称" v-model="stationName" />
@@ -29,7 +29,7 @@
                     <el-row class="mt-2" :gutter="20">
                         <el-col :span="8">
                             <el-date-picker v-model="endTime" type="datetime" placeholder="结束时间"
-                                value-format="YYYY-MM-DD HH:mm:ss" style="width:100%" />
+                                value-format="YYYY-MM-DD HH:mm:ss" style="width: 100%" />
                         </el-col>
                         <el-col :span="8">
                             <el-input placeholder="搜索订单(英文逗号分割批量搜索)" v-model="id">
@@ -59,22 +59,30 @@
                             <template #default="scope">
                                 <el-button type="primary" @click="randerAgain(scope.row)"
                                     v-if="scope.row.state == 5">重新导出</el-button>
-                                <el-button type="danger" @click="handleDelete(scope.row.id)"
-                                    v-else-if="scope.row.state != 4">删除</el-button>
-                                <el-button type="danger" @click="handleDelete(scope.row.id)"
-                                    v-else-if="scope.row.state == 4">彻底删除</el-button>
-                                <el-button type="success" :disabled="scope.row.state != 2 || disabledDownLoad" :icon="Download" circle
-                                    @click="downloadVideo(scope.row.id, scope.row.startTime, scope.row.goods.goodsId)"></el-button>
-
-                                <!-- <el-button type="success" :disabled="scope.row.state != 2" :icon="Download" circle
-                                         @click="downloadVideo(scope.row.id)">
-                                    </el-button> -->
-                                <!-- </input> -->
+                                <el-popconfirm width="200" confirm-button-text="确认" cancel-button-text="取消"
+                                    confirm-button-type="danger" cancel-button-type="info" :hide-after="50" title="确认删除？"
+                                    @confirm="handleDelete(scope.row.id)" v-else-if="scope.row.state != 4">
+                                    <template #reference>
+                                        <el-button type="danger">删除</el-button>
+                                    </template>
+                                </el-popconfirm>
+                                <el-popconfirm width="200" confirm-button-text="确认" cancel-button-text="取消"
+                                    confirm-button-type="danger" cancel-button-type="info" :hide-after="50" title="确认彻底删除？"
+                                    @confirm="handleDelete(scope.row.id)" v-else-if="scope.row.state == 4">
+                                    <template #reference>
+                                        <el-button type="danger">彻底删除</el-button>
+                                    </template>
+                                </el-popconfirm>
+                                <el-button type="success" :disabled="scope.row.state != 2 || disabledDownLoad"
+                                    :icon="Download" circle @click="
+                                        downloadVideo(
+                                            scope.row.id,
+                                            scope.row.startTime,
+                                            scope.row.goods.goodsId
+                                        )
+                                        "></el-button>
                                 <el-button type="success" circle :icon="VideoPlay" @click="play(scope.row)"
                                     :disabled="scope.row.state != 2" />
-                                <!-- <input type="file" :disabled="scope.row.state != 2" :underline="false"
-                                    style="margin: 0 10px; " webkitdirectory :id="fileLoadId(scope.row.id)"
-                                    @input="filePathChange(scope.row.id)"> -->
                             </template>
                         </el-table-column>
                     </el-table>
@@ -96,29 +104,26 @@
         <template #footer>
             <span class="dialog-footer">
                 <el-button @click="searchDialog = false">取消</el-button>
-                <el-button type="primary" @click="search()">
-                    搜索
-                </el-button>
+                <el-button type="primary" @click="search()"> 搜索 </el-button>
             </span>
         </template>
     </el-dialog>
 </template>
 <script>
-
-import { flaskRequest, postRequest } from '@/utils/http';
-import { message } from '@/utils/messageBox';
-import { ref } from 'vue';
-import { Search, VideoPlay, Download } from '@element-plus/icons-vue'
-import { stateType } from '@/global'
-import router from '@/router/index'
-import {ipcRenderer} from 'electron'
+import { flaskRequest, postRequest } from "@/utils/http";
+import { message } from "@/utils/messageBox";
+import { ref } from "vue";
+import { Search, VideoPlay, Download } from "@element-plus/icons-vue";
+import { stateType } from "@/global";
+import router from "@/router/index";
+import { ipcRenderer } from "electron";
 
 export default {
     setup() {
         let videoList = ref([]);
         let state = ref(-1);
-        let startTime = ref('');
-        let endTime = ref('');
+        let startTime = ref("");
+        let endTime = ref("");
         let total = ref(0);
         let current_page = ref(1);
         let pageSize = ref(10);
@@ -133,44 +138,48 @@ export default {
         let disabledDownLoad = ref(false);
 
         const select = () => {
-            flaskRequest("/videoSelect", {
-                startTime: startTime.value,
-                endTime: endTime.value,
-                state: state.value,
-                page: current_page.value,
-                size: pageSize.value,
-                sortBy: sortBy.value,
-                desc: desc.value,
-                stationName: stationName.value,
-                goods_ids: id.value,
-            }, function success(resp) {
-                if (resp.code == '200') {
-                    videoList.value = resp.data.content;
-                    total.value = resp.data.totalElements;
-                } else {
-                    message(resp.msg, 'error');
+            flaskRequest(
+                "/videoSelect",
+                {
+                    startTime: startTime.value,
+                    endTime: endTime.value,
+                    state: state.value,
+                    page: current_page.value,
+                    size: pageSize.value,
+                    sortBy: sortBy.value,
+                    desc: desc.value,
+                    stationName: stationName.value,
+                    goods_ids: id.value,
+                },
+                function success(resp) {
+                    if (resp.code == "200") {
+                        videoList.value = resp.data.content;
+                        total.value = resp.data.totalElements;
+                    } else {
+                        message(resp.msg, "error");
+                    }
+                },
+                function error(resp) {
+                    message(resp.responseJSON.msg, "error");
                 }
-            }, function error(resp) {
-                message(resp.responseJSON.msg, 'error');
-            })
-        }
+            );
+        };
         const sortChange = (column) => {
-            const prop = column.prop
+            const prop = column.prop;
             if (prop) {
-                if (column.order == 'ascending') {
+                if (column.order == "ascending") {
                     desc.value = false;
-                    sortBy.value = prop
-                } else if (column.order == 'descending') {
+                    sortBy.value = prop;
+                } else if (column.order == "descending") {
                     desc.value = true;
-                    sortBy.value = prop
+                    sortBy.value = prop;
                 } else if (column.order == null) {
-                    sortBy.value = 'id'
+                    sortBy.value = "id";
                     desc.value = false;
                 }
                 select();
             }
-        }
-
+        };
 
         select();
 
@@ -195,7 +204,7 @@ export default {
             disabledDownLoad,
             id,
             searchId,
-        }
+        };
     },
     methods: {
         handleSizeChange(size) {
@@ -220,81 +229,109 @@ export default {
         },
         handleDelete(id) {
             const that = this;
-            postRequest("/video/delete", {
-                id: id,
-            }, function success(resp) {
-                if (resp.code == '200') {
-                    that.select();
-                    message(resp.msg, 'success');
-                    if (resp.data != 0) {
-                        flaskRequest("/deleteVideo", {
-                            video: resp.data,
-                        }, function success(resp) {
-                            console.log(resp);
-                        }, function error(resp) {
-                            console.log(resp);
-                        })
+            postRequest(
+                "/video/delete",
+                {
+                    id: id,
+                },
+                function success(resp) {
+                    if (resp.code == "200") {
+                        that.select();
+                        message(resp.msg, "success");
+                        if (resp.data != 0) {
+                            flaskRequest(
+                                "/deleteVideo",
+                                {
+                                    video: resp.data,
+                                },
+                                function success(resp) {
+                                    console.log(resp);
+                                },
+                                function error(resp) {
+                                    console.log(resp);
+                                }
+                            );
+                        }
+                    } else {
+                        message(resp.msg, "error");
                     }
-                } else {
-                    message(resp.msg, 'error');
+                },
+                function error(resp) {
+                    // message(resp.msg, 'error');
+                    message(resp.responseJSON.msg, "error");
                 }
-            }, function error(resp) {
-                // message(resp.msg, 'error');
-                message(resp.responseJSON.msg, 'error');
-            })
+            );
         },
         play(row) {
             // let size = "height=" + window.screen.height + ",width=" + window.screen.width;
-            let size = "height=" + (window.screen.availHeight - 100) + ",width=" + (window.screen.availWidth - 100) + ",autoHideMenuBar=true";
-            let routerUrl = router.resolve({ name: 'video_view', params: { time: row.startTime.split(" ")[0], id: row.id } });
+            let size =
+                "height=" +
+                (window.screen.availHeight - 100) +
+                ",width=" +
+                (window.screen.availWidth - 100) +
+                ",autoHideMenuBar=true";
+            let routerUrl = router.resolve({
+                name: "video_view",
+                params: { time: row.startTime.split(" ")[0], id: row.id },
+            });
             window.open(routerUrl.href, "_blank", size);
         },
         search() {
             this.id = this.searchId.replace(/\n/g, ",");
-            this.select()
+            this.select();
             this.searchDialog = false;
         },
         randerAgain(video) {
             // const that = this;
-            flaskRequest("/renderAgain", {
-                "video": video.id,
-                startTime: video.startTime,
-            }, function success(resp) {
-                message(resp.msg, "success");
-                video.state = 1;
-            }, function error() {
-                message("导出错误", "error");
-            })
+            flaskRequest(
+                "/renderAgain",
+                {
+                    video: video.id,
+                    startTime: video.startTime,
+                },
+                function success(resp) {
+                    message(resp.msg, "success");
+                    video.state = 1;
+                },
+                function error() {
+                    message("导出错误", "error");
+                }
+            );
         },
         downloadVideo(id, startTime, goodsId) {
             const that = this;
-            that.disabledDownLoad = true; 
-            const result = ipcRenderer.invoke('dialog:openFile');
-            result.then(res=>{
-                if (res != "canceled"){
-                    flaskRequest("/fileLoad", {
-                        id: id,
-                        startTime: startTime,
-                        goodsId: goodsId,
-                        path: res,
-                    }, function success(resp) {
-                        if (resp.code == 200) {
-                            message(resp.msg, "success");
-                        } else {
-                            message(resp.msg, "warning");
+            that.disabledDownLoad = true;
+            const result = ipcRenderer.invoke("dialog:openFile");
+            result.then((res) => {
+                if (res != "canceled") {
+                    flaskRequest(
+                        "/fileLoad",
+                        {
+                            id: id,
+                            startTime: startTime,
+                            goodsId: goodsId,
+                            path: res,
+                        },
+                        function success(resp) {
+                            if (resp.code == 200) {
+                                message(resp.msg, "success");
+                            } else {
+                                message(resp.msg, "warning");
+                            }
+                            that.disabledDownLoad = false;
+                        },
+                        function error(resp) {
+                            message(resp.responseJSON.msg, "error");
+                            that.disabledDownLoad = false;
                         }
-                        that.disabledDownLoad = false; 
-                    }, function error(resp) {
-                        message(resp.responseJSON.msg, "error");
-                        that.disabledDownLoad = false; 
-                    })
-                }else{
-                    that.disabledDownLoad = false; 
+                    );
+                } else {
+                    that.disabledDownLoad = false;
                 }
-            })
-        }
-    }
-}
+            });
+        },
+    },
+};
 </script>
 
 <style scoped>

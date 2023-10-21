@@ -47,12 +47,12 @@
                 <div class="card-body">
                     <el-table :data="cameraList" style="width: 100%" height="540" @sort-change="sortChange">
                         <el-table-column label="序号" width="60">
-                            <template #default="scope" >
+                            <template #default="scope">
                                 {{ (current_page - 1) * pageSize + scope.$index + 1 }}
                             </template>
                         </el-table-column>
                         <el-table-column prop="ip" label="IP" sortable="costom" />
-                        <el-table-column prop="port" label="端口" sortable="costom" width="100"/>
+                        <el-table-column prop="port" label="端口" sortable="costom" width="100" />
                         <el-table-column prop="type" label="类型" :formatter="Formatter" />
                         <el-table-column prop="company.companyName" label="公司名称" v-if="$store.state.user.company.id == 1" />
                         <el-table-column prop="username" label="用户名" />
@@ -62,7 +62,13 @@
                                 <el-button type="warning" round @click="channelSelect(scope.row.id)">通道编辑</el-button>
                                 <el-button type="warning" round @click="watermarkSelect(scope.row.id)">水印编辑</el-button>
                                 <el-button type="primary" :icon="Edit" circle @click="edit(scope.row)" />
-                                <el-button type="danger" :icon="Delete" circle @click="handleDelete(scope.row.id)" />
+                                <el-popconfirm width="200" confirm-button-text="确认" cancel-button-text="取消"
+                                    confirm-button-type="danger" cancel-button-type="info" :hide-after="50" title="确认删除？"
+                                    @confirm="handleDelete(scope.row.id)">
+                                    <template #reference>
+                                        <el-button type="danger" :icon="Delete" circle />
+                                    </template>
+                                </el-popconfirm>
                             </template>
                         </el-table-column>
                     </el-table>
@@ -119,7 +125,12 @@
             <el-table-column align="center" prop="channel" class="m-2" label="通道号" sortable />
             <el-table-column width="100" align="right">
                 <template #default="scope">
-                    <el-button type="danger" :icon="Delete" circle @click="channelDelete(scope.row.id)" />
+                    <el-popconfirm width="200" confirm-button-text="确认" cancel-button-text="取消" confirm-button-type="danger"
+                        cancel-button-type="info" :hide-after="50" title="确认删除？" @confirm="channelDelete(scope.row.id)">
+                        <template #reference>
+                            <el-button type="danger" :icon="Delete" circle />
+                        </template>
+                    </el-popconfirm>
                 </template>
             </el-table-column>
         </el-table>
@@ -149,7 +160,12 @@
             <el-table-column prop="position" label="水印位置" :formatter="positionFormatter" />
             <el-table-column width="100" align="right">
                 <template #default="scope">
-                    <el-button type="danger" :icon="Delete" circle @click="watermarkDelete(scope.row.id)" />
+                    <el-popconfirm width="200" confirm-button-text="确认" cancel-button-text="取消" confirm-button-type="danger"
+                        cancel-button-type="info" :hide-after="50" title="确认删除？" @confirm="watermarkDelete(scope.row.id)">
+                        <template #reference>
+                            <el-button type="danger" :icon="Delete" circle />
+                        </template>
+                    </el-popconfirm>
                 </template>
             </el-table-column>
         </el-table>

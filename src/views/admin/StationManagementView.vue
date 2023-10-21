@@ -1,10 +1,11 @@
 <template>
-    <div class="row" style="width:100%; margin-top:30px">
+    <div class="row" style="width: 100%; margin-top: 30px">
         <div class="col-2"></div>
         <div class="col-8">
             <div class="card">
                 <div class="card-header text-center">
-                    <h3>工位管理
+                    <h3>
+                        工位管理
                         <el-button class="float-end" type="primary" plain @click="addDialog = true">新增</el-button>
                         <el-dialog v-model="addDialog" title="工位设置" width="30%" @close="handleClear">
                             <el-form label-position="right" label-width="100px" :model="form" style="max-width: 460px">
@@ -27,16 +28,16 @@
                                     <el-input v-model="form.timeout" />
                                 </el-form-item> -->
 
-
                                 <el-form-item label="录像机">
-                                    <el-select v-model="form.cameraId" placeholder="选择录像机" style="width:100%">
+                                    <el-select v-model="form.cameraId" placeholder="选择录像机" style="width: 100%">
                                         <el-option v-for="camera in cameraList" :key="camera.id" :label="camera.ip"
                                             :value="camera.id" />
                                     </el-select>
                                 </el-form-item>
                                 <el-form-item label="通道">
                                     <el-select v-model="form.channels" placeholder="选择通道" multiple collapse-tags
-                                        collapse-tags-tooltip :max-collapse-tags="2" :multiple-limit="2" style="width:100%">
+                                        collapse-tags-tooltip :max-collapse-tags="2" :multiple-limit="2"
+                                        style="width: 100%">
                                         <el-option v-for="channel in channelList" :key="channel.id"
                                             :label="channel.channelName" :value="channel.id" />
                                     </el-select>
@@ -59,7 +60,7 @@
                 <div class="card-body">
                     <el-table :data="stationList" style="width: 100%" height="540" @sort-change="sortChange">
                         <el-table-column label="序号" width="60">
-                            <template #default="scope" >
+                            <template #default="scope">
                                 {{ (current_page - 1) * pageSize + scope.$index + 1 }}
                             </template>
                         </el-table-column>
@@ -76,7 +77,13 @@
                         <el-table-column width="100" align="right" fixed="right">
                             <template #default="scope">
                                 <el-button type="primary" :icon="Edit" circle @click="edit(scope.row)" />
-                                <el-button type="danger" :icon="Delete" circle @click="handleDelete(scope.row.id)" />
+                                <el-popconfirm width="200" confirm-button-text="确认" cancel-button-text="取消"
+                                    confirm-button-type="danger" cancel-button-type="info" :hide-after="50" title="确认删除？"
+                                    @confirm="handleDelete(scope.row.id)">
+                                    <template #reference>
+                                        <el-button type="danger" :icon="Delete" circle />
+                                    </template>
+                                </el-popconfirm>
                             </template>
                         </el-table-column>
                     </el-table>
@@ -93,12 +100,12 @@
     </div>
 </template>
 <script>
-import { ref } from 'vue';
-import { postRequest } from '@/utils/http';
-import { message } from '@/utils/messageBox';
-import { reactive } from 'vue';
-import { Delete, Edit } from '@element-plus/icons-vue'
-import { useStore } from 'vuex';
+import { ref } from "vue";
+import { postRequest } from "@/utils/http";
+import { message } from "@/utils/messageBox";
+import { reactive } from "vue";
+import { Delete, Edit } from "@element-plus/icons-vue";
+import { useStore } from "vuex";
 
 export default {
     setup() {
@@ -107,13 +114,13 @@ export default {
             stationIp: "",
             uid: "",
             channels: [],
-            cameraId: '',
-            cameraIp: '',
-            backtrack1: '',
-            backtrack2: '',
-            timeout: '',
-            stationType: '',
-        })
+            cameraId: "",
+            cameraIp: "",
+            backtrack1: "",
+            backtrack2: "",
+            timeout: "",
+            stationType: "",
+        });
 
         const store = useStore();
         let total = ref(0);
@@ -125,57 +132,66 @@ export default {
         let sortBy = ref("id");
         let desc = ref(false);
         let editFlag = ref(false);
-        let stationId = ref('');
-        let stationType = ref('');
+        let stationId = ref("");
+        let stationType = ref("");
 
         let addDialog = ref(false);
         let justEdit = ref(false);
 
         const select = () => {
-            postRequest("/station/select", {
-                page: current_page.value,
-                size: pageSize.value,
-                sortBy: sortBy.value,
-                desc: desc.value,
-            }, function success(resp) {
-                if (resp.code == '200') {
-                    total.value = resp.data.totalElements;
-                    stationList.value = resp.data.content;
+            postRequest(
+                "/station/select",
+                {
+                    page: current_page.value,
+                    size: pageSize.value,
+                    sortBy: sortBy.value,
+                    desc: desc.value,
+                },
+                function success(resp) {
+                    if (resp.code == "200") {
+                        total.value = resp.data.totalElements;
+                        stationList.value = resp.data.content;
+                    }
+                },
+                function error() {
+                    message("查询失败", "error");
                 }
-            }, function error() {
-                message('查询失败', 'error');
-            })
-        }
+            );
+        };
 
         const sortChange = (column) => {
-            const prop = column.prop
+            const prop = column.prop;
             if (prop) {
-                if (column.order == 'ascending') {
+                if (column.order == "ascending") {
                     desc.value = false;
-                    sortBy.value = prop
-                } else if (column.order == 'descending') {
+                    sortBy.value = prop;
+                } else if (column.order == "descending") {
                     desc.value = true;
-                    sortBy.value = prop
+                    sortBy.value = prop;
                 } else if (column.order == null) {
-                    sortBy.value = 'id'
+                    sortBy.value = "id";
                     desc.value = false;
                 }
                 select();
             }
-        }
+        };
 
         const findAllCamera = () => {
-            postRequest("/camera/findAllIdAndIP", {
-            }, function success(resp) {
-                if (resp.code == '200') {
-                    cameraList.value = resp.data;
-                } else {
-                    message(resp.msg, 'error');
+            postRequest(
+                "/camera/findAllIdAndIP",
+                {},
+                function success(resp) {
+                    if (resp.code == "200") {
+                        cameraList.value = resp.data;
+                    } else {
+                        message(resp.msg, "error");
+                    }
+                },
+                function error() {
+                    message("摄像头查询失败", "error");
                 }
-            }, function error() {
-                message('摄像头查询失败', 'error');
-            })
-        }
+            );
+        };
 
         select();
         findAllCamera();
@@ -200,7 +216,7 @@ export default {
 
             sortChange,
             select,
-        }
+        };
     },
     methods: {
         handleSizeChange(size) {
@@ -213,49 +229,59 @@ export default {
         },
         handleDelete(id) {
             const that = this;
-            postRequest("/station/delete", {
-                id: id,
-            }, function success(resp) {
-                if (resp.code == '200') {
-                    message(resp.msg, 'success');
-                    that.select();
-                } else {
-                    message(resp.msg, 'error');
+            postRequest(
+                "/station/delete",
+                {
+                    id: id,
+                },
+                function success(resp) {
+                    if (resp.code == "200") {
+                        message(resp.msg, "success");
+                        that.select();
+                    } else {
+                        message(resp.msg, "error");
+                    }
+                },
+                function error() {
+                    message("删除失败", "error");
                 }
-            }, function error() {
-                message('删除失败', 'error');
-            })
+            );
         },
         addStation() {
             const that = this;
             let string = that.form.channels.join();
-            postRequest("/station/add", {
-                stationName: that.form.stationName,
-                stationIp: that.form.stationIp,
-                channels: string,
-                stationType: that.form.stationType,
-                backtrack1: that.form.backtrack1,
-                backtrack2: that.form.backtrack2,
-            }, function success(resp) {
-                if (resp.code == '200') {
-                    message(resp.msg, 'success');
-                    that.select();
-                    that.handleClear();
-                    that.addDialog = false;
-                } else {
-                    message(resp.msg, 'error');
+            postRequest(
+                "/station/add",
+                {
+                    stationName: that.form.stationName,
+                    stationIp: that.form.stationIp,
+                    channels: string,
+                    stationType: that.form.stationType,
+                    backtrack1: that.form.backtrack1,
+                    backtrack2: that.form.backtrack2,
+                },
+                function success(resp) {
+                    if (resp.code == "200") {
+                        message(resp.msg, "success");
+                        that.select();
+                        that.handleClear();
+                        that.addDialog = false;
+                    } else {
+                        message(resp.msg, "error");
+                    }
+                },
+                function error() {
+                    message("添加失败", "error");
                 }
-            }, function error() {
-                message('添加失败', 'error');
-            })
+            );
         },
         handleClear() {
             this.form.channels = [];
-            this.form.stationIp = '';
-            this.form.stationName = '';
-            this.form.cameraId = '';
-            this.form.uid = '';
-            this.form.cameraIp = '';
+            this.form.stationIp = "";
+            this.form.stationName = "";
+            this.form.cameraId = "";
+            this.form.uid = "";
+            this.form.cameraIp = "";
             this.editFlag = false;
             this.addDialog = false;
         },
@@ -271,46 +297,55 @@ export default {
             that.form.timeout = station.timeout;
             that.form.stationType = station.stationType;
             that.stationId = station.id;
-            postRequest("/station/findStationChannel", {
-                id: station.id,
-            }, function success(resp) {
-                if (resp.data[0] !== undefined && resp.data[0].camera != null) {
-                    that.form.cameraId = resp.data[0].camera.id;
-                    for (let i of resp.data) {
-                        that.form.channels.push(i.id);
+            postRequest(
+                "/station/findStationChannel",
+                {
+                    id: station.id,
+                },
+                function success(resp) {
+                    if (resp.data[0] !== undefined && resp.data[0].camera != null) {
+                        that.form.cameraId = resp.data[0].camera.id;
+                        for (let i of resp.data) {
+                            that.form.channels.push(i.id);
+                        }
                     }
+                },
+                function error() {
+                    message("通道查询失败", "error");
                 }
-            }, function error() {
-                message('通道查询失败', 'error');
-            })
+            );
         },
         updateStation() {
             const that = this;
             let channels = that.form.channels.join();
-            postRequest("/station/update", {
-                id: that.stationId,
-                stationName: that.form.stationName,
-                stationIp: that.form.stationIp,
-                channels: channels,
-                backtrack1: that.form.backtrack1,
-                backtrack2: that.form.backtrack2,
-                timeout: that.form.timeout,
-                stationType: that.form.stationType,
-            }, function success(resp) {
-                if (resp.code == '200') {
-                    message(resp.msg, 'success');
-                    that.select();
-                    that.handleClear();
-                } else {
-                    message(resp.msg, 'error');
+            postRequest(
+                "/station/update",
+                {
+                    id: that.stationId,
+                    stationName: that.form.stationName,
+                    stationIp: that.form.stationIp,
+                    channels: channels,
+                    backtrack1: that.form.backtrack1,
+                    backtrack2: that.form.backtrack2,
+                    timeout: that.form.timeout,
+                    stationType: that.form.stationType,
+                },
+                function success(resp) {
+                    if (resp.code == "200") {
+                        message(resp.msg, "success");
+                        that.select();
+                        that.handleClear();
+                    } else {
+                        message(resp.msg, "error");
+                    }
+                },
+                function error() {
+                    message("修改失败", "error");
                 }
-            }, function error() {
-                message('修改失败', 'error');
-            })
+            );
         },
         status(value) {
-            if (value == undefined)
-                return false;
+            if (value == undefined) return false;
             let last = new Date(value);
             let now = new Date();
             let state;
@@ -321,7 +356,7 @@ export default {
                 state = true;
             }
             return state;
-        }
+        },
     },
     watch: {
         "form.cameraId"(newV) {
@@ -331,20 +366,23 @@ export default {
             } else {
                 that.form.channels = [];
             }
-            postRequest("/channel/select", {
-                camera_id: newV,
-            }, function success(resp) {
-                if (resp.code == '200') {
-                    that.channelList = resp.data;
-                } else {
-                    message(resp.msg, 'error');
+            postRequest(
+                "/channel/select",
+                {
+                    camera_id: newV,
+                },
+                function success(resp) {
+                    if (resp.code == "200") {
+                        that.channelList = resp.data;
+                    } else {
+                        message(resp.msg, "error");
+                    }
+                },
+                function error() {
+                    message("查询通道失败", "error");
                 }
-            }, function error() {
-                message('查询通道失败', 'error');
-            })
+            );
         },
-    }
-}
-
+    },
+};
 </script>
-

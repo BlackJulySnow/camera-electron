@@ -63,7 +63,8 @@
                                 <el-table-column prop="cos" label="云存储">
                                     <template #default="scope">
                                         <el-switch class="ml-2" v-model="scope.row.cos"
-                                            style="--el-switch-on-color: #13ce66; --el-switch-off-color: #ff4949" @click="switchChange(scope.row)"/>
+                                            style="--el-switch-on-color: #13ce66; --el-switch-off-color: #ff4949"
+                                            @click="switchChange(scope.row)" />
                                     </template>
                                 </el-table-column>
                                 <el-table-column prop="expiresDate" label="过期时间" sortable="costom" width="180" />
@@ -93,8 +94,14 @@
                                         </el-popover>
 
                                         <el-button type="primary" :icon="Edit" circle @click="edit(scope.row)" />
-                                        <el-button type="danger" :icon="Delete" circle
-                                            @click="handleDelete(scope.row.id)" />
+                                        <el-popconfirm width="200" confirm-button-text="确认" cancel-button-text="取消"
+                                            confirm-button-type="danger" cancel-button-type="info" :hide-after="50"
+                                            title="确认删除？" @confirm="handleDelete(scope.row.id)">
+                                            <template #reference>
+                                                <el-button type="danger" :icon="Delete" circle />
+                                            </template>
+                                        </el-popconfirm>
+
                                     </template>
                                 </el-table-column>
                             </el-table>
@@ -193,7 +200,13 @@
                                     </template>
                                     <template #default="scope">
                                         <el-button type="primary" :icon="Edit" circle @click="editVip(scope.row)" />
-                                        <el-button type="danger" :icon="Delete" circle @click="deleteVip(scope.row.id)" />
+                                        <el-popconfirm width="200" confirm-button-text="确认" cancel-button-text="取消"
+                                            confirm-button-type="danger" cancel-button-type="info" :hide-after="50"
+                                            title="确认删除？" @confirm="deleteVip(scope.row.id)">
+                                            <template #reference>
+                                                <el-button type="danger" :icon="Delete" circle />
+                                            </template>
+                                        </el-popconfirm>
                                     </template>
                                 </el-table-column>
                             </el-table>
@@ -836,16 +849,16 @@ export default {
 
                 })
         },
-        switchChange(company){
+        switchChange(company) {
             const that = this;
-            postRequest("/company/updateCos",{
+            postRequest("/company/updateCos", {
                 id: company.id,
                 state: company.cos,
-            }, function success(resp){
-                if (resp.code == 200){
+            }, function success(resp) {
+                if (resp.code == 200) {
                     that.select();
                     message(resp.msg, 'success');
-                }else{
+                } else {
                     message(resp.msg, 'warning');
                 }
             })
