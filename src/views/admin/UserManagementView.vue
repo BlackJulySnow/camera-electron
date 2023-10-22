@@ -26,9 +26,22 @@
                                             :value="role.value" />
                                     </el-select>
                                 </el-form-item>
-                                <el-form-item label="组别">
+                                <el-form-item label="组别" v-if="$store.state.user.company.id != 1">
                                     <el-select v-model="form.group" placeholder="选择用户组别" style="width:100%">
                                         <el-option v-for="group in groupList" :key="group.id" :label="group.name"
+                                            :value="group.id" />
+                                    </el-select>
+                                </el-form-item>
+                                <el-form-item label="公司" v-if="$store.state.user.company.id == 1">
+                                    <el-select v-model="form.adminCompany" placeholder="选择用户公司" style="width:100%"
+                                        filterable>
+                                        <el-option v-for="company in adminCompanyList" :key="company.id"
+                                            :label="company.companyName" :value="company.id" />
+                                    </el-select>
+                                </el-form-item>
+                                <el-form-item label="组别" v-if="$store.state.user.company.id == 1">
+                                    <el-select v-model="form.adminGroup" placeholder="选择用户组别" style="width:100%">
+                                        <el-option v-for="group in adminGroupList" :key="group.id" :label="group.name"
                                             :value="group.id" />
                                     </el-select>
                                 </el-form-item>
@@ -104,9 +117,21 @@
                                     :value="role.value" />
                             </el-select>
                         </el-form-item>
-                        <el-form-item label="组别">
+                        <el-form-item label="组别" v-if="$store.state.user.company.id != 1">
                             <el-select v-model="form.group" placeholder="选择用户组别" style="width:100%">
                                 <el-option v-for="group in groupList" :key="group.id" :label="group.name"
+                                    :value="group.id" />
+                            </el-select>
+                        </el-form-item>
+                        <el-form-item label="公司" v-if="$store.state.user.company.id == 1">
+                            <el-select v-model="form.adminCompany" placeholder="选择用户公司" style="width:100%" filterable>
+                                <el-option v-for="company in adminCompanyList" :key="company.id"
+                                    :label="company.companyName" :value="company.id" />
+                            </el-select>
+                        </el-form-item>
+                        <el-form-item label="组别" v-if="$store.state.user.company.id == 1">
+                            <el-select v-model="form.adminGroup" placeholder="选择用户组别" style="width:100%">
+                                <el-option v-for="group in adminGroupList" :key="group.id" :label="group.name"
                                     :value="group.id" />
                             </el-select>
                         </el-form-item>
@@ -146,6 +171,7 @@ import { Delete, Edit } from '@element-plus/icons-vue'
 import { reactive } from 'vue'
 import { message } from '@/utils/messageBox';
 import { userRole } from "@/global";
+import { useStore } from 'vuex';
 export default {
     setup() {
         const form = reactive({
@@ -155,7 +181,10 @@ export default {
             enable: true,
             password: '',
             group: '',
+            adminCompany: '',
+            adminGroup: ''
         })
+        const store = useStore();
         let total = ref(0);
         let current_page = ref(1);
         let pageSize = ref(10);
@@ -166,6 +195,8 @@ export default {
         let editDialog = ref(false);
         let key = ref('');
         let groupList = ref([]);
+        let adminGroupList = ref([]);
+        let adminCompanyList = ref([]);
         let imgSrc = ref('');
         let imageDialog = ref(false);
         let imageList = ref([]);
@@ -203,7 +234,14 @@ export default {
                 message(resp.responseJSON.msg, 'error');
             })
         }
-
+        const findCompany = () => {
+            postRequest("/company/all", {}, function success(resp) {
+                console.log(resp);
+                if (resp.code == '200') {
+                    adminCompanyList.value = resp.data;
+                }
+            })
+        }
         const sortChange = (column) => {
             const prop = column.prop
             if (prop) {
@@ -220,7 +258,12 @@ export default {
                 select();
             }
         }
-        findGroup();
+        if (store.state.user.company.id != 1) {
+            findGroup();
+        } else {
+            findCompany();
+        }
+
         select();
         return {
             Edit,
@@ -237,6 +280,8 @@ export default {
             current_page,
             groupList,
             userRole,
+            adminGroupList,
+            adminCompanyList,
             imgSrc,
             imageList,
             select,
@@ -260,6 +305,8 @@ export default {
             that.form.enable = true;
             that.form.password = '';
             that.form.group = '';
+            that.form.adminCompany = '';
+            that.form.adminGroup = '';
         },
         addUser() {
             const that = this;
@@ -270,6 +317,8 @@ export default {
                 role: that.form.role,
                 enable: that.form.enable,
                 group: that.form.group,
+                adminGroup: that.form.adminGroup,
+                adminCompany: that.form.adminCompany,
             }, function success(resp) {
                 if (resp.code == '200') {
                     message('添加成功', 'success');
@@ -316,6 +365,8 @@ export default {
                 role: that.form.role,
                 enable: that.form.enable,
                 group: that.form.group,
+                adminGroup: that.form.adminGroup,
+                adminCompany: that.form.adminCompany,
             }, function success(resp) {
                 if (resp.code == '200') {
                     message('修改成功', 'success');
@@ -372,6 +423,15 @@ export default {
         },
         pageSize() {
             this.select();
+        },
+        "form.adminCompany"(newV) {
+            const that = this;
+            postRequest("/group/selectByCompanyId", {
+                id: newV
+            }, function success(resp) {
+                that.adminGroupList = resp.data;
+            })
+            console.log(newV);
         }
     }
 }
