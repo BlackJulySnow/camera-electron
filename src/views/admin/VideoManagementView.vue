@@ -73,7 +73,8 @@
                                         <el-button type="danger">彻底删除</el-button>
                                     </template>
                                 </el-popconfirm>
-                                <el-button type="success" :disabled="scope.row.state != 2 || disabledDownLoad"
+                                <el-button type="success"
+                                    :disabled="(scope.row.state != 2 && scope.row.state != 6) || disabledDownLoad"
                                     :icon="Download" circle @click="
                                         downloadVideo(
                                             scope.row.id,
@@ -82,7 +83,7 @@
                                         )
                                         "></el-button>
                                 <el-button type="success" circle :icon="VideoPlay" @click="play(scope.row)"
-                                    :disabled="scope.row.state != 2" />
+                                    :disabled="(scope.row.state != 2)" />
                             </template>
                         </el-table-column>
                     </el-table>
@@ -318,6 +319,7 @@ export default {
                             } else {
                                 message(resp.msg, "warning");
                             }
+                            that.select()
                             that.disabledDownLoad = false;
                         },
                         function error(resp) {

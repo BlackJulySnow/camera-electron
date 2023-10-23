@@ -55,7 +55,7 @@ async function createWindow() {
 
         //vue.config.json配置的一样
         autoUpdater.setFeedURL(
-            "https://app-1253647758.cos.ap-guangzhou.myqcloud.com/"
+            "https://app-1305188540.cos.ap-guangzhou.myqcloud.com/"
         ); //地址我就不写了，上面有说
 
         //更新错误

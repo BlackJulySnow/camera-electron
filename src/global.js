@@ -35,6 +35,10 @@ export const stateType = [{
     {
         label: "本地不存在视频",
         value: 5,
+    },
+    {
+        label: "云存储成功",
+        value: 6,
     }
 ]
 
