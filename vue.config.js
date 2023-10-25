@@ -51,7 +51,8 @@ module.exports = {
                     "icon": "/src/assets/logo.png",
                     "target": [{
                         "target": "nsis"
-                    }]
+                    }],
+                    requestedExecutionLevel: 'requireAdministrator'
                 },
                 "extraResources": [
                     "./dist/**"

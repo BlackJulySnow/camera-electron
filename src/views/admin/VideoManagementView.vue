@@ -17,7 +17,7 @@
                             <el-input placeholder="搜索工号" v-model="uid" />
                         </el-col> -->
                         <el-col :span="8">
-                            <el-select placeholder="视频状态" v-model="state">
+                            <el-select placeholder="视频状态" v-model="state" style="width:100%">
                                 <el-option v-for="Type in stateType" :key="Type.value" :label="Type.label"
                                     :value="Type.value" />
                             </el-select>
@@ -54,11 +54,13 @@
                         <el-table-column prop="goods.goodsId" label="单号" />
                         <el-table-column prop="goods.station.stationName" label="扫描工位" />
                         <el-table-column prop="state" label="视频状态" :formatter="stateFormatter" sortable="costom"
-                            width="130" />
+                            width="140" />
                         <el-table-column align="right" width="200">
                             <template #default="scope">
                                 <el-button type="primary" @click="randerAgain(scope.row)"
                                     v-if="scope.row.state == 5">重新导出</el-button>
+                                <el-button type="primary" @click="downloadFromCloud(scope.row)"
+                                    v-else-if="scope.row.state == 6">云下载</el-button>
                                 <el-popconfirm width="200" confirm-button-text="确认" cancel-button-text="取消"
                                     confirm-button-type="danger" cancel-button-type="info" :hide-after="50" title="确认删除？"
                                     @confirm="handleDelete(scope.row.id)" v-else-if="scope.row.state != 4">
@@ -73,8 +75,7 @@
                                         <el-button type="danger">彻底删除</el-button>
                                     </template>
                                 </el-popconfirm>
-                                <el-button type="success"
-                                    :disabled="(scope.row.state != 2 && scope.row.state != 6) || disabledDownLoad"
+                                <el-button type="success" :disabled="scope.row.state != 2 || disabledDownLoad"
                                     :icon="Download" circle @click="
                                         downloadVideo(
                                             scope.row.id,
@@ -332,6 +333,23 @@ export default {
                 }
             });
         },
+        downloadFromCloud(video) {
+            const that = this;
+            flaskRequest("/downloadFromCloud", {
+                id: video.id,
+                startTime: video.startTime
+            }, function success(resp) {
+                if (resp.code == 200) {
+                    message(resp.msg, "success")
+                    that.select()
+                } else {
+                    message(resp.msg, "warning");
+                }
+            }, function error() {
+                message("请求错误", "error");
+            })
+            console.log(video);
+        }
     },
 };
 </script>

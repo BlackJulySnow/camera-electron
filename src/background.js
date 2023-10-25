@@ -4,6 +4,7 @@ import { app, protocol, BrowserWindow, screen, dialog, ipcMain, ipcRenderer } fr
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib'
 import installExtension, { VUEJS3_DEVTOOLS } from 'electron-devtools-installer'
 import { autoUpdater } from "electron-updater";
+import { event } from 'jquery';
 
 // import { postRequest } from './utils/http'
 // import path from "path";
@@ -52,7 +53,7 @@ async function createWindow() {
             updateAva: { status: 1, msg: "检测到新版本，正在下载请稍后" },
             updateNotAva: { status: 2, msg: "您现在使用的版本为最新版本,无需更新!" }
         };
-
+        autoUpdater.autoDownload = false;
         //vue.config.json配置的一样
         autoUpdater.setFeedURL(
             "https://app-1305188540.cos.ap-guangzhou.myqcloud.com/"
@@ -71,23 +72,26 @@ async function createWindow() {
         //发现新版本
         //当发现一个可用更新的时候，更新包下载会自动开始
         autoUpdater.on("update-available", function(info) {
-            sendUpdateMessage({ msg: "正在下载更新包" });
+            let msg = {
+                version: info.version,
+                releaseNotes: info.releaseNotes,
+                releaseDate: info.releaseDate
+            }
+            sendUpdateMessage({ status: 1, msg: msg });
         });
         autoUpdater.on('update-downloaded', (event, releaseNotes, releaseName) => {
-            sendUpdateMessage({ msg: "下载完成" });
-            dialog.showMessageBox({
-                type: 'info',
-                title: '应用有新的版本',
-                message: `版本号：${event.version}，是否现在重启应用更新？`,
-                buttons: ['是', '否'],
-                defaultId: 0
-            }).then((buttonIndex) => {
-
-                if (buttonIndex.response == 0) {
-                    autoUpdater.quitAndInstall();
-                }
-            });
+            sendUpdateMessage({ status: 5, msg: "下载完成" });
+            setTimeout(function() {
+                autoUpdater.quitAndInstall();
+            }, 2000);
         });
+        autoUpdater.on('download-progress', (progressObj) => {
+            let msg = {
+                percent: progressObj.percent,
+                speed: progressObj.bytesPerSecond,
+            }
+            sendUpdateProgress(msg);
+        })
 
         //当前版本为最新版本
         autoUpdater.on("update-not-available", function(info) {
@@ -102,10 +106,22 @@ async function createWindow() {
             win.webContents.send("message", text);
         }
     }
+
+    function sendUpdateProgress(text) {
+        if (win) {
+            win.webContents.send("progress", text);
+        }
+    }
     // 检查更新
     ipcMain.on("checkForUpdate", (event, data) => {
         autoUpdater.checkForUpdates();
     });
+    ipcMain.on("updateStart", (event, data) => {
+        autoUpdater.downloadUpdate();
+    })
+    ipcMain.on("removeListen", (event, data) => {
+        ipcMain.removeAllListeners("checkForUpdate");
+    })
     handleUpdate()
 }
 
@@ -151,10 +167,8 @@ async function handleFileOpen() {
     };
     const { canceled, filePaths } = await dialog.showOpenDialog(options)
     if (canceled) {
-        console.log(1)
         return "canceled"
     } else {
-        console.log(2, filePaths)
         return filePaths[0]
     }
 }
