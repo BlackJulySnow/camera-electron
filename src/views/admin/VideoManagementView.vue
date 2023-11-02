@@ -334,14 +334,14 @@ export default {
             });
         },
         downloadFromCloud(video) {
-            const that = this;
+            // const that = this;
             flaskRequest("/downloadFromCloud", {
                 id: video.id,
                 startTime: video.startTime
             }, function success(resp) {
                 if (resp.code == 200) {
                     message(resp.msg, "success")
-                    that.select()
+                    video.state = 0;
                 } else {
                     message(resp.msg, "warning");
                 }
